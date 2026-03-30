@@ -1,0 +1,23 @@
+{
+  "baseline": {
+    "config": {
+      "description": "Prompt padrão sem instruções específicas",
+      "system_suffix": ""
+    },
+    "n_samples": 2
+  },
+  "detailed_instructions": {
+    "config": {
+      "description": "Prompt com instruções detalhadas de formatação",
+      "system_suffix": "\nAdicional: Sempre estruture sua resposta em seções claras. Use dados numéricos quando disponíveis. Cite as fontes."
+    },
+    "n_samples": 2
+  },
+  "concise": {
+    "config": {
+      "description": "Prompt pedindo respostas concisas",
+      "system_suffix": "\nAdicional: Seja conciso e direto. Máximo 3 parágrafos. Foque nos números mais relevantes."
+    },
+    "n_samples": 2
+  }
+}
