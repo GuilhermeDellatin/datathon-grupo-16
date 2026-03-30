@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Environments
+.env
+.venv/
+venv/
+
+# Data (managed by DVC)
+data/raw/
+data/processed/
+*.csv
+*.parquet
+
+# ML artifacts
+mlruns/
+models/
+*.pt
+*.pth
+*.onnx
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+test-results.xml
+
+# Misc
+.mypy_cache/
+.ruff_cache/
+*.log
