@@ -31,8 +31,8 @@ def _has_encoding_attack(text: str) -> bool:
     suspicious_patterns = [
         r"\\x[0-9a-fA-F]{2}",
         r"\\u[0-9a-fA-F]{4}",
-        r"%00",
-        r"\x00",
+        r"&#\d+;",
+        r"&#x[0-9a-fA-F]+;",
     ]
     for pattern in suspicious_patterns:
         if re.search(pattern, text):
@@ -179,6 +179,17 @@ class OutputGuardrail:
         Returns:
             Texto com disclaimers adicionados se necessário.
         """
-        if contains_prediction and self.DISCLAIMER not in output:
-            output += f"\n\n{self.DISCLAIMER}"
+        if contains_prediction:
+            disclaimer = (
+                "\n\n⚠️ AVISO: Esta análise não constitui recomendação de investimento. "
+                "Consulte um profissional qualificado."
+            )
+            prediction_keywords = [
+                "previsão", "predição", "prevê", "preço futuro", "vai subir", "vai cair",
+            ]
+
+            if any(kw in output.lower() for kw in prediction_keywords):
+                if "não constitui recomendação" not in output.lower():
+                    output += disclaimer
+
         return output
