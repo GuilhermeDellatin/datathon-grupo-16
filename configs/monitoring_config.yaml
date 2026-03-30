@@ -1,0 +1,45 @@
+drift:
+  reference_window_size: 252  # ~1 ano de trading days
+  current_window_size: 30
+  psi_warning_threshold: 0.1
+  psi_retrain_threshold: 0.2
+  check_interval_hours: 24
+  features_to_monitor:
+    - Close
+    - Volume
+    - rsi_14
+    - macd
+    - sma_20
+
+alerts:
+  enabled: true
+  channels:
+    - type: "log"
+    - type: "prometheus"
+
+prometheus:
+  port: 9090
+  metrics:
+    - name: "prediction_latency_seconds"
+      type: "histogram"
+      description: "Tempo de inferência do modelo"
+      buckets: [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0]
+    - name: "prediction_requests_total"
+      type: "counter"
+      description: "Total de requisições de predição"
+    - name: "model_drift_psi"
+      type: "gauge"
+      description: "PSI score atual do modelo"
+    - name: "agent_requests_total"
+      type: "counter"
+      description: "Total de requisições ao agente"
+    - name: "rag_retrieval_latency_seconds"
+      type: "histogram"
+      description: "Tempo de retrieval do RAG"
+
+grafana:
+  port: 3000
+  dashboards:
+    - name: "Model Performance"
+    - name: "API Health"
+    - name: "Drift Detection"

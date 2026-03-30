@@ -1,0 +1,39 @@
+stages:
+  collect_data:
+    cmd: python -m src.data.collector
+    deps:
+      - src/data/collector.py
+      - configs/model_config.yaml
+    outs:
+      - data/raw/petr4_raw.parquet
+
+  feature_engineering:
+    cmd: python -m src.data.feature_engineering
+    deps:
+      - src/data/feature_engineering.py
+      - data/raw/petr4_raw.parquet
+      - configs/model_config.yaml
+    outs:
+      - data/processed/petr4_features.parquet
+
+  train:
+    cmd: python -m src.models.train
+    deps:
+      - src/models/train.py
+      - src/models/lstm_model.py
+      - data/processed/petr4_features.parquet
+      - configs/model_config.yaml
+    outs:
+      - models/lstm_petr4_best.pt
+    metrics:
+      - metrics/train_metrics.json:
+          cache: false
+
+  evaluate:
+    cmd: python -m evaluation.ragas_eval
+    deps:
+      - evaluation/ragas_eval.py
+      - data/golden_set/
+    metrics:
+      - metrics/ragas_metrics.json:
+          cache: false
