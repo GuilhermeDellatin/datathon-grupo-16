@@ -19,7 +19,7 @@ data/processed/
 
 # ML artifacts
 mlruns/
-models/
+/models/
 *.pt
 *.pth
 *.onnx
