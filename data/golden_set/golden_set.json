@@ -1,0 +1,277 @@
+[
+  {
+    "id": "gs_001",
+    "query": "Qual é a previsão de preço da PETR4 para os próximos 5 dias?",
+    "expected_answer": "O modelo LSTM prevê o preço de fechamento da PETR4.SA com base em 60 dias de histórico, usando indicadores técnicos como RSI, MACD e médias móveis. A predição é para o horizonte de 5 dias úteis.",
+    "contexts": [
+      "O modelo LSTM utiliza uma janela de 60 dias de dados históricos incluindo preço de fechamento, volume e indicadores técnicos.",
+      "A predição é baseada em padrões temporais capturados pela rede neural LSTM com 2 camadas e 128 unidades hidden."
+    ],
+    "category": "prediction",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_002",
+    "query": "O modelo pode prever se a PETR4 vai subir ou descer amanhã?",
+    "expected_answer": "O modelo LSTM prevê o preço de fechamento, não a direção do movimento. A predição é para um horizonte de 5 dias úteis e não deve ser usada como recomendação de investimento.",
+    "contexts": [
+      "O modelo é treinado para regressão univariada do preço de fechamento, não para classificação direcional.",
+      "Esta predição NÃO constitui recomendação de investimento."
+    ],
+    "category": "prediction",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_003",
+    "query": "Qual a acurácia das predições do modelo LSTM para PETR4?",
+    "expected_answer": "A acurácia do modelo é medida pelas métricas MAE, RMSE e MAPE, logadas no MLflow. O modelo é avaliado no conjunto de teste (10% dos dados) com split temporal.",
+    "contexts": [
+      "Métricas de regressão: MAE (erro absoluto médio), RMSE (raiz do erro quadrático médio), MAPE (erro percentual).",
+      "O modelo usa early stopping com patience de 15 épocas para evitar overfitting."
+    ],
+    "category": "prediction",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_004",
+    "query": "Como a predição lida com eventos inesperados como crises?",
+    "expected_answer": "O modelo LSTM é treinado com dados históricos e não consegue prever eventos inesperados (cisnes negros). Em períodos de alta volatilidade, as predições tendem a ser menos confiáveis.",
+    "contexts": [
+      "Limitação do modelo: dados históricos não garantem performance futura.",
+      "Eventos como COVID-19 e Lava Jato causaram quedas abruptas que o modelo não teria previsto."
+    ],
+    "category": "prediction",
+    "difficulty": "hard"
+  },
+  {
+    "id": "gs_005",
+    "query": "O que é o RSI e como ele indica se uma ação está sobrecomprada?",
+    "expected_answer": "O RSI (Relative Strength Index) é um oscilador de momentum que mede a velocidade e magnitude das mudanças de preço. Valores acima de 70 indicam sobrecompra e abaixo de 30 indicam sobrevenda.",
+    "contexts": [
+      "O RSI é calculado com período de 14 dias e varia de 0 a 100.",
+      "Indicadores técnicos como RSI são usados como features de entrada do modelo LSTM."
+    ],
+    "category": "technical_analysis",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_006",
+    "query": "Qual a diferença entre SMA e EMA?",
+    "expected_answer": "A SMA (Simple Moving Average) calcula a média aritmética simples dos preços em N dias. A EMA (Exponential Moving Average) dá mais peso a dados recentes, reagindo mais rápido a mudanças de preço.",
+    "contexts": [
+      "SMA(20) usa os últimos 20 dias com pesos iguais. EMA(12) e EMA(26) são usadas no cálculo do MACD.",
+      "O modelo utiliza SMA(20), SMA(50), EMA(12) e EMA(26) como features."
+    ],
+    "category": "technical_analysis",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_007",
+    "query": "O que é o MACD e como interpretar seus sinais?",
+    "expected_answer": "O MACD (Moving Average Convergence Divergence) é a diferença entre EMA(12) e EMA(26). Quando o MACD cruza acima da linha de sinal (EMA(9) do MACD), é sinal de compra; quando cruza abaixo, é sinal de venda.",
+    "contexts": [
+      "MACD = EMA(12) - EMA(26). A linha de sinal é uma EMA(9) do MACD.",
+      "O MACD e o MACD signal são features de entrada do modelo LSTM."
+    ],
+    "category": "technical_analysis",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_008",
+    "query": "Como funcionam as Bandas de Bollinger?",
+    "expected_answer": "As Bandas de Bollinger consistem em uma banda central (SMA de 20 dias) e bandas superior e inferior a 2 desvios padrão. Preço próximo da banda superior indica possível sobrecompra; da inferior, sobrevenda. Bandas estreitas indicam baixa volatilidade.",
+    "contexts": [
+      "Bollinger Bands: banda central = SMA(20), superior = SMA(20) + 2*std, inferior = SMA(20) - 2*std.",
+      "As bandas superior e inferior de Bollinger são features de entrada do modelo."
+    ],
+    "category": "technical_analysis",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_009",
+    "query": "O que a Petrobras faz e quais são seus principais segmentos?",
+    "expected_answer": "A Petrobras é a maior empresa de energia do Brasil, com atuação em Exploração e Produção (E&P), Refino, Transporte e Comercialização (RTC), e Gás e Energia. O pré-sal representa mais de 75% da produção.",
+    "contexts": [
+      "A Petrobras é líder em E&P em águas profundas e ultra-profundas.",
+      "Principais campos do pré-sal: Tupi (Lula), Búzios, Sapinhoá, Mero."
+    ],
+    "category": "company_info",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_010",
+    "query": "Qual a política de dividendos da Petrobras?",
+    "expected_answer": "A Petrobras distribui 45% do fluxo de caixa livre aos acionistas. Dividendos extraordinários podem ser distribuídos conforme decisão do Conselho. O dividend yield histórico é de 10-20%.",
+    "contexts": [
+      "Política de dividendos: distribuir 45% do fluxo de caixa livre.",
+      "Petrobras é uma das maiores pagadoras de dividendos do mundo."
+    ],
+    "category": "company_info",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_011",
+    "query": "Qual é o nível de endividamento da Petrobras?",
+    "expected_answer": "A Petrobras mantém meta de dívida líquida abaixo de US$ 65 bilhões, com relação Dívida Líquida/EBITDA historicamente entre 0,5x e 1,2x. A empresa recuperou grau de investimento.",
+    "contexts": [
+      "Dívida líquida: meta abaixo de US$ 65 bilhões.",
+      "Relação Dívida Líquida/EBITDA entre 0,5x e 1,2x nos últimos anos."
+    ],
+    "category": "company_info",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_012",
+    "query": "Qual é a produção diária de petróleo da Petrobras?",
+    "expected_answer": "A produção total da Petrobras é de aproximadamente 2,8 milhões de barris de óleo equivalente por dia (boe/d). A meta para 2025-2029 é manter produção acima desse patamar.",
+    "contexts": [
+      "Produção total: ~2,8 milhões boe/d em 2024.",
+      "O pré-sal brasileiro tem custos de extração abaixo de US$ 30/barril."
+    ],
+    "category": "company_info",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_013",
+    "query": "Qual a arquitetura do modelo LSTM usado para predição?",
+    "expected_answer": "O modelo usa 2 camadas LSTM empilhadas com 128 unidades hidden, dropout de 0.2, recebendo sequências de 60 dias com 14 features. A saída é uma camada linear para predição univariada do preço de fechamento.",
+    "contexts": [
+      "Arquitetura: 2 camadas LSTM, hidden_size=128, dropout=0.2.",
+      "Input: sequências de 60 timesteps com 14 features técnicas e de preço."
+    ],
+    "category": "model_info",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_014",
+    "query": "Quais features o modelo LSTM utiliza como entrada?",
+    "expected_answer": "O modelo usa 14 features: Close, Volume, SMA(20), SMA(50), EMA(12), EMA(26), RSI(14), MACD, MACD signal, Bollinger upper/lower, Volume SMA(20), daily return e log return.",
+    "contexts": [
+      "Features de entrada incluem preço, volume e indicadores técnicos calculados pela biblioteca ta.",
+      "Todas as features são escaladas com MinMaxScaler antes de entrar no modelo."
+    ],
+    "category": "model_info",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_015",
+    "query": "Como o modelo é versionado e gerenciado?",
+    "expected_answer": "O modelo é versionado no MLflow Model Registry com tags obrigatórias (owner, risk_level, git_sha, etc.). A promoção usa champion-challenger: o novo modelo só substitui o anterior se RMSE melhorar em pelo menos 0.5%.",
+    "contexts": [
+      "MLflow Model Registry com versionamento semântico e tags obrigatórias.",
+      "Champion-challenger: promover se RMSE melhora >= 0.5%."
+    ],
+    "category": "model_info",
+    "difficulty": "hard"
+  },
+  {
+    "id": "gs_016",
+    "query": "O que é drift detection e como funciona no modelo?",
+    "expected_answer": "Drift detection monitora mudanças na distribuição dos dados usando PSI (Population Stability Index). PSI < 0.1 é normal, 0.1-0.2 é warning e > 0.2 dispara retraining automático.",
+    "contexts": [
+      "PSI < 0.1: OK. PSI 0.1-0.2: WARNING. PSI > 0.2: CRITICAL (trigger retraining).",
+      "Features monitoradas: Close, Volume, rsi_14, macd, sma_20."
+    ],
+    "category": "model_info",
+    "difficulty": "hard"
+  },
+  {
+    "id": "gs_017",
+    "query": "Como o preço do petróleo Brent afeta a PETR4?",
+    "expected_answer": "O preço do Brent tem correlação positiva forte (~0.7-0.8) com PETR4. Alta do petróleo beneficia a receita da Petrobras, que é majoritariamente em dólares. Cada US$ 1 de variação impacta significativamente o EBITDA.",
+    "contexts": [
+      "Brent (USD): correlação positiva forte com PETR4 (~0.7-0.8).",
+      "Receita da Petrobras é dolarizada, custos são em reais."
+    ],
+    "category": "market_context",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_018",
+    "query": "Quais fatores geopolíticos podem afetar o preço da PETR4?",
+    "expected_answer": "Conflitos no Oriente Médio podem causar spikes de preço do petróleo. Sanções à Rússia redefiniram fluxos comerciais. Tensões no Mar Vermelho afetam custos de frete. Política energética dos EUA também é relevante.",
+    "contexts": [
+      "Conflitos no Oriente Médio podem causar spikes por risco de oferta.",
+      "Sanções à Rússia redefiniram fluxos comerciais de petróleo."
+    ],
+    "category": "market_context",
+    "difficulty": "hard"
+  },
+  {
+    "id": "gs_019",
+    "query": "Qual é o impacto da transição energética na Petrobras?",
+    "expected_answer": "A demanda por petróleo pode atingir pico entre 2030-2040. A Petrobras investe US$ 11,5 bilhões em descarbonização no plano 2025-2029. O pré-sal tem pegada de carbono relativamente baixa vs. concorrentes.",
+    "contexts": [
+      "Transição energética é principal risco estrutural de longo prazo.",
+      "Investimentos em descarbonização: US$ 11,5 bi no plano 2025-2029."
+    ],
+    "category": "market_context",
+    "difficulty": "hard"
+  },
+  {
+    "id": "gs_020",
+    "query": "Como o câmbio USD/BRL afeta a PETR4?",
+    "expected_answer": "A Petrobras tem receita dolarizada e custos em reais. Real fraco aumenta receita em BRL mas eleva custos de dívida em moeda estrangeira. A correlação com câmbio é mista.",
+    "contexts": [
+      "USD/BRL: correlação mista. Real fraco aumenta receita em BRL, mas eleva custos de dívida.",
+      "Fatores de risco: câmbio é o segundo principal driver após preço do petróleo."
+    ],
+    "category": "market_context",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_021",
+    "query": "Quais são os principais riscos de investir em PETR4?",
+    "expected_answer": "Os principais riscos são: volatilidade do preço do petróleo, risco cambial (USD/BRL), interferência governamental em preços e investimentos, transição energética de longo prazo e risco político por ser estatal.",
+    "contexts": [
+      "Fatores de risco: preço do petróleo, câmbio, regulatório, transição energética, político.",
+      "Como empresa estatal, sujeita a mudanças de governo e política pública."
+    ],
+    "category": "risk",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_022",
+    "query": "O modelo pode ser usado para tomar decisões de investimento?",
+    "expected_answer": "Não. O modelo é um exercício acadêmico e suas predições NÃO constituem recomendação de investimento. Mercados são influenciados por fatores que o modelo não captura, como notícias e eventos inesperados.",
+    "contexts": [
+      "Esta predição NÃO constitui recomendação de investimento.",
+      "Limitação: modelo não incorpora sentimento, notícias ou análise fundamentalista."
+    ],
+    "category": "risk",
+    "difficulty": "easy"
+  },
+  {
+    "id": "gs_023",
+    "query": "Quais são as limitações do modelo LSTM para predição de ações?",
+    "expected_answer": "Limitações incluem: não prevê eventos inesperados, viés temporal do período de treinamento, não usa análise de sentimento, treinado apenas para PETR4 (não generalizável) e dados históricos não garantem performance futura.",
+    "contexts": [
+      "Modelo treinado com dados de um período específico; performance pode degradar em regimes diferentes.",
+      "Single-stock: treinado apenas para PETR4.SA, não generalizável."
+    ],
+    "category": "risk",
+    "difficulty": "medium"
+  },
+  {
+    "id": "gs_024",
+    "query": "Como o modelo lida com dados de PII do usuário?",
+    "expected_answer": "O sistema utiliza guardrails de output com Presidio para detectar e anonimizar PII (dados pessoais). Entidades como nomes, emails, telefones e cartões de crédito são removidos das respostas, em conformidade com a LGPD.",
+    "contexts": [
+      "Output Guardrails: remoção de PII via Presidio (PERSON, EMAIL, PHONE, CREDIT_CARD).",
+      "Conformidade com LGPD (Lei 13.709/2018)."
+    ],
+    "category": "risk",
+    "difficulty": "hard"
+  },
+  {
+    "id": "gs_025",
+    "query": "O que são as Bandas de Bollinger e qual sua utilidade na análise técnica?",
+    "expected_answer": "As Bandas de Bollinger medem volatilidade. Banda central é SMA(20), bandas superior/inferior estão a 2 desvios padrão. Bandas estreitas sugerem baixa volatilidade e possível breakout. São features de entrada do modelo LSTM.",
+    "contexts": [
+      "Bollinger Bands: SMA(20) ± 2*desvio padrão.",
+      "Bandas estreitas indicam baixa volatilidade (possível breakout)."
+    ],
+    "category": "technical_analysis",
+    "difficulty": "medium"
+  }
+]
