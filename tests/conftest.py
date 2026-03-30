@@ -3,6 +3,9 @@
 import numpy as np
 import pandas as pd
 import pytest
+import torch
+
+from src.models.lstm_model import LSTMPredictor
 
 
 @pytest.fixture
@@ -59,3 +62,36 @@ def sample_sequences(sample_features_data: pd.DataFrame):
 
     X, y = create_sequences(data_scaled, sequence_length=30, prediction_horizon=1, target_idx=0)
     return X, y, scaler
+
+
+@pytest.fixture
+def sample_model() -> LSTMPredictor:
+    """Modelo LSTM instanciado para testes (não treinado)."""
+    return LSTMPredictor(
+        input_size=5,
+        hidden_size=32,
+        num_layers=1,
+        dropout=0.0,
+        output_size=1,
+    )
+
+
+@pytest.fixture
+def sample_input_tensor() -> torch.Tensor:
+    """Tensor de input sintético para testes de modelo."""
+    batch_size = 4
+    seq_len = 30
+    n_features = 5
+    return torch.randn(batch_size, seq_len, n_features)
+
+
+@pytest.fixture
+def mock_agent_response() -> dict:
+    """Resposta mock do agente para testes."""
+    return {
+        "answer": "O preço atual da PETR4.SA é R$ 35.50.",
+        "intermediate_steps": [
+            {"tool": "fetch_market_data", "tool_input": "PETR4.SA", "output": "..."},
+        ],
+        "success": True,
+    }
