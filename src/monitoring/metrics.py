@@ -65,9 +65,9 @@ PREDICTION_ERROR = Gauge(
     "Erro absoluto da última predição verificada",
 )
 
-PREDICTION_DIRECTION_ACCURACY = Gauge(
+DIRECTION_ACCURACY = Gauge(
     "prediction_direction_accuracy",
-    "Acurácia direcional acumulada",
+    "Acurácia direcional acumulada (0-1)",
 )
 
 # --- Model Info ---
@@ -76,3 +76,19 @@ MODEL_INFO = Info(
     "model",
     "Informações do modelo em produção",
 )
+
+
+def set_model_info(version: str, ticker: str, framework: str) -> None:
+    """Registra informações do modelo carregado.
+
+    Args:
+        version: Versão do modelo.
+        ticker: Ticker utilizado.
+        framework: Framework (pytorch).
+    """
+    MODEL_INFO.info({
+        "version": version,
+        "ticker": ticker,
+        "framework": framework,
+    })
+    logger.info("Model info registrada: v%s, %s, %s", version, ticker, framework)
