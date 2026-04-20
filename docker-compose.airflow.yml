@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  airflow:
+    image: apache/airflow:2.9.0-python3.11
+    container_name: airflow_local
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - .:/opt/project
+    working_dir: /opt/project
+    command: standalone
