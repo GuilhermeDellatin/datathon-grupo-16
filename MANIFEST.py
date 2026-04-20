@@ -8,11 +8,9 @@ Status: ✅ Pronto para Produção
 """
 
 ARQUIVOS_CRIADOS = {
-    
     # ═══════════════════════════════════════════════════════════════════
     # 1. ARQUIVO PRINCIPAL DA DAG
     # ═══════════════════════════════════════════════════════════════════
-    
     "🚀 airflow/dags/petr4_ml_pipeline.py": {
         "tipo": "DAG Principal",
         "linhas": 447,
@@ -35,11 +33,9 @@ ARQUIVOS_CRIADOS = {
         "schedule": "0 2 * * *  # Diário às 2 AM UTC",
         "timeout": "4 horas",
     },
-    
     # ═══════════════════════════════════════════════════════════════════
     # 2. MÓDULOS DE MONITORAMENTO
     # ═══════════════════════════════════════════════════════════════════
-    
     "✅ src/monitoring/quality_gates.py": {
         "tipo": "Quality Gates",
         "linhas": 192,
@@ -53,7 +49,6 @@ ARQUIVOS_CRIADOS = {
             "load_gates_from_config()",
         ],
     },
-    
     "✅ src/monitoring/drift_detector.py": {
         "tipo": "Drift Detection",
         "linhas": 247,
@@ -69,7 +64,6 @@ ARQUIVOS_CRIADOS = {
             "Thresholds adaptativos",
         ],
     },
-    
     "✅ src/monitoring/ab_test.py": {
         "tipo": "A/B Testing",
         "linhas": 318,
@@ -85,7 +79,6 @@ ARQUIVOS_CRIADOS = {
             "Identificação de problemas",
         ],
     },
-    
     "✅ src/monitoring/model_registry.py": {
         "tipo": "MLflow Integration",
         "linhas": 321,
@@ -102,11 +95,9 @@ ARQUIVOS_CRIADOS = {
             "Versionamento local",
         ],
     },
-    
     # ═══════════════════════════════════════════════════════════════════
     # 3. CONFIGURAÇÃO
     # ═══════════════════════════════════════════════════════════════════
-    
     "⚙️  configs/mlops_config.yaml": {
         "tipo": "Configuração Central",
         "linhas": 206,
@@ -127,11 +118,9 @@ ARQUIVOS_CRIADOS = {
             "schedule - Agendamento",
         ],
     },
-    
     # ═══════════════════════════════════════════════════════════════════
     # 4. UTILITÁRIOS E SCRIPTS
     # ═══════════════════════════════════════════════════════════════════
-    
     "🎮 airflow/utils/dag_manager.py": {
         "tipo": "CLI Manager",
         "linhas": 246,
@@ -146,7 +135,6 @@ ARQUIVOS_CRIADOS = {
         ],
         "uso": "python airflow/utils/dag_manager.py --trigger",
     },
-    
     "⚙️  airflow/scripts/quickstart.sh": {
         "tipo": "Setup Script",
         "linhas": 163,
@@ -162,11 +150,9 @@ ARQUIVOS_CRIADOS = {
         ],
         "uso": "bash airflow/scripts/quickstart.sh",
     },
-    
     # ═══════════════════════════════════════════════════════════════════
     # 5. TESTES
     # ═══════════════════════════════════════════════════════════════════
-    
     "🧪 tests/test_mlops_dag.py": {
         "tipo": "Test Suite",
         "linhas": 386,
@@ -182,11 +168,9 @@ ARQUIVOS_CRIADOS = {
         "num_tests": "15+",
         "cobertura": "Funções principais da DAG",
     },
-    
     # ═══════════════════════════════════════════════════════════════════
     # 6. DOCUMENTAÇÃO
     # ═══════════════════════════════════════════════════════════════════
-    
     "📖 airflow/dags/README_MLOPS_DAG.md": {
         "tipo": "Documentação Principal",
         "tamanho": "Completo",
@@ -206,7 +190,6 @@ ARQUIVOS_CRIADOS = {
             "Troubleshooting",
         ],
     },
-    
     "🆘 TROUBLESHOOTING_MLOPS.md": {
         "tipo": "Guia de Troubleshooting",
         "cenários": 15,
@@ -227,7 +210,6 @@ ARQUIVOS_CRIADOS = {
             "Contato e suporte",
         ],
     },
-    
     "📋 MLOPS_DAG_SUMMARY.md": {
         "tipo": "Resumo Executivo",
         "conteúdo": [
@@ -243,7 +225,6 @@ ARQUIVOS_CRIADOS = {
             "Suporte e troubleshooting",
         ],
     },
-    
     "📊 airflow/dags/DAG_DIAGRAM.py": {
         "tipo": "Visualização",
         "conteúdo": [
@@ -256,7 +237,6 @@ ARQUIVOS_CRIADOS = {
             "Ver resultados",
         ],
     },
-    
     "⚡ QUICK_COMMANDS.sh": {
         "tipo": "Cheat Sheet",
         "seções": [
@@ -275,11 +255,9 @@ ARQUIVOS_CRIADOS = {
             "Atalhos",
         ],
     },
-    
     # ═══════════════════════════════════════════════════════════════════
     # 7. MODIFICAÇÕES EXISTENTES
     # ═══════════════════════════════════════════════════════════════════
-    
     "📝 airflow/dags/petr4_ml_pipeline.py (modificado)": {
         "tipo": "Substituição Completa",
         "anterior": "57 linhas (básico)",
@@ -316,7 +294,6 @@ RECURSOS_IMPLEMENTADOS = {
         "✓ Feature engineering",
         "✓ Normalização automática",
     ],
-    
     "Monitoramento": [
         "✓ Data drift detection",
         "✓ Concept drift detection",
@@ -324,7 +301,6 @@ RECURSOS_IMPLEMENTADOS = {
         "✓ Performance tracking",
         "✓ Relatórios automáticos",
     ],
-    
     "MLOps": [
         "✓ Model Registry integration",
         "✓ Versionamento automático",
@@ -332,7 +308,6 @@ RECURSOS_IMPLEMENTADOS = {
         "✓ Experiment tracking",
         "✓ Artifact management",
     ],
-    
     "Validação": [
         "✓ A/B testing",
         "✓ Statistical tests",
@@ -340,7 +315,6 @@ RECURSOS_IMPLEMENTADOS = {
         "✓ Performance validation",
         "✓ Data quality checks",
     ],
-    
     "Deployment": [
         "✓ Staging stage",
         "✓ Production stage",
@@ -348,7 +322,6 @@ RECURSOS_IMPLEMENTADOS = {
         "✓ Deploy readiness",
         "✓ Rollback capability",
     ],
-    
     "Operacionalização": [
         "✓ CLI manager",
         "✓ Agendamento automático",
@@ -390,19 +363,17 @@ PRÓXIMAS_EXTENSÕES = [
 # ═══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    import json
-    
     print("╔═══════════════════════════════════════════════════════════════════════════╗")
     print("║                    MANIFESTO - DAG MLOps CRIADA                            ║")
     print("╚═══════════════════════════════════════════════════════════════════════════╝")
     print()
-    
+
     print("📊 ESTATÍSTICAS")
     print("─" * 80)
     for key, value in ESTATÍSTICAS.items():
         print(f"  {key}: {value}")
     print()
-    
+
     print("✅ RECURSOS IMPLEMENTADOS")
     print("─" * 80)
     for category, items in RECURSOS_IMPLEMENTADOS.items():
@@ -410,7 +381,7 @@ if __name__ == "__main__":
         for item in items:
             print(f"    {item}")
     print()
-    
+
     print("🎯 QUALITY GATES")
     print("─" * 80)
     for stage, gates in QUALITY_GATES.items():
@@ -421,13 +392,13 @@ if __name__ == "__main__":
         else:
             print(f"  {stage}: {gates}")
     print()
-    
+
     print("📈 PRÓXIMAS EXTENSÕES")
     print("─" * 80)
     for ext in PRÓXIMAS_EXTENSÕES:
         print(f"  {ext}")
     print()
-    
+
     print("╔═══════════════════════════════════════════════════════════════════════════╗")
     print("║  ✅ DAG MLOps está PRONTA PARA PRODUÇÃO!                                  ║")
     print("║                                                                            ║")

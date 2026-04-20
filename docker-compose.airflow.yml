@@ -4,12 +4,26 @@ services:
   airflow:
     image: apache/airflow:2.9.0-python3.11
     container_name: airflow_local
+
+    user: root   # 👈 ADICIONE ISSO
+
     ports:
       - "8080:8080"
+
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      PROJECT_ROOT: /opt/project
+      MLFLOW_TRACKING_URI: http://host.docker.internal:5000
+      PYTHONPATH: /opt/project
+
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - .:/opt/project
+      - /var/run/docker.sock:/var/run/docker.sock
+
     working_dir: /opt/project
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
     command: standalone

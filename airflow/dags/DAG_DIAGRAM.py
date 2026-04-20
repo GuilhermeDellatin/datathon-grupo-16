@@ -2,6 +2,8 @@
 Visualização da DAG MLOps em Texto
 """
 
+import tempfile
+
 # ASCII Art da DAG
 dag_diagram = """
 ╔════════════════════════════════════════════════════════════════════════════════╗
@@ -304,9 +306,10 @@ VENDO RESULTADOS:
 # Imprimir diagrama
 if __name__ == "__main__":
     print(dag_diagram)
-    
+
     # Salvar em arquivo
-    with open("/tmp/dag_diagram.txt", "w") as f:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
         f.write(dag_diagram)
-    
+        temp_path = f.name  # Use este caminho se precisar referenciar o arquivo depois
+
     print("\n✓ Diagrama salvo em: /tmp/dag_diagram.txt")

@@ -14,7 +14,8 @@ import pandera as pa
 import ta
 import yaml
 from pandera import Check, Column, DataFrameSchema
-from sklearn.preprocessing import MinMaxScaler
+
+from src.paths import resolve_project_file
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,8 @@ def load_config(config_path: str = "configs/model_config.yaml") -> dict:
     Returns:
         Dicionário com configurações.
     """
-    with open(config_path) as f:
+    config_file = resolve_project_file(config_path)
+    with open(config_file) as f:
         return yaml.safe_load(f)
 
 
@@ -164,29 +166,29 @@ def create_sequences(
         target_idx: Índice da coluna target no array.
 
     Returns:
-        Tupla (X, y) onde X.shape = (n_samples, sequence_length, n_features)
-        e y.shape = (n_samples,).
+        Tupla (x_data, y_data) onde x_data.shape = (n_samples, sequence_length, n_features)
+        e y_data.shape = (n_samples,).
     """
-    X, y = [], []
+    x_data, y_data = [], []
     for i in range(sequence_length, len(data) - prediction_horizon + 1):
-        X.append(data[i - sequence_length : i])
-        y.append(data[i + prediction_horizon - 1, target_idx])
+        x_data.append(data[i - sequence_length : i])
+        y_data.append(data[i + prediction_horizon - 1, target_idx])
 
-    X = np.array(X, dtype=np.float32)
-    y = np.array(y, dtype=np.float32)
+    x_data = np.array(x_data, dtype=np.float32)
+    y_data = np.array(y_data, dtype=np.float32)
 
     logger.info(
         "Sequências criadas: X=%s, y=%s (seq_len=%d, horizon=%d)",
-        X.shape,
-        y.shape,
+        x_data.shape,
+        y_data.shape,
         sequence_length,
         prediction_horizon,
     )
-    return X, y
+    return x_data, y_data
 
 
 def split_data(
-    X: np.ndarray,
+    x_data: np.ndarray,
     y: np.ndarray,
     train_ratio: float = 0.8,
     val_ratio: float = 0.1,
@@ -202,18 +204,18 @@ def split_data(
     Returns:
         Dicionário com splits: train, val, test.
     """
-    n = len(X)
+    n = len(x_data)
     train_end = int(n * train_ratio)
     val_end = int(n * (train_ratio + val_ratio))
 
     splits = {
-        "train": (X[:train_end], y[:train_end]),
-        "val": (X[train_end:val_end], y[train_end:val_end]),
-        "test": (X[val_end:], y[val_end:]),
+        "train": (x_data[:train_end], y[:train_end]),
+        "val": (x_data[train_end:val_end], y[train_end:val_end]),
+        "test": (x_data[val_end:], y[val_end:]),
     }
 
-    for name, (Xi, yi) in splits.items():
-        logger.info("Split %s: X=%s, y=%s", name, Xi.shape, yi.shape)
+    for name, (x_split, y_split) in splits.items():
+        logger.info("Split %s: X=%s, y=%s", name, x_split.shape, y_split.shape)
 
     return splits
 
@@ -225,9 +227,9 @@ def main() -> None:
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     )
 
-    config = load_config()
-    raw_path = "data/raw/petr4_raw.parquet"
-    output_path = "data/processed/petr4_features.parquet"
+    load_config()
+    raw_path = resolve_project_file("data/raw/petr4_raw.parquet")
+    output_path = resolve_project_file("data/processed/petr4_features.parquet")
 
     df = pd.read_parquet(raw_path)
     df_features = compute_features(df)

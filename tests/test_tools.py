@@ -1,7 +1,6 @@
 """Testes das tool functions com mocks para yfinance e dependências externas."""
 
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
@@ -66,18 +65,18 @@ class TestSearchFinancialDocs:
             Document(page_content="Petrobras é uma empresa...", metadata={"source": "test.md"})
         ]
 
-        with patch("src.agent.rag_pipeline.RAGPipeline", return_value=mock_rag):
-            from src.agent.tools import _search_financial_docs
-
-            # The function imports RAGPipeline internally, so we need to patch at import
-            with patch("src.agent.tools.RAGPipeline", return_value=mock_rag, create=True):
-                pass
+        with patch("src.agent.rag_pipeline.RAGPipeline", return_value=mock_rag), patch(
+            "src.agent.tools.RAGPipeline", return_value=mock_rag, create=True
+        ):
+            pass
 
     def test_search_handles_exception(self):
         """Deve tratar exceção na busca."""
         from src.agent.tools import _search_financial_docs
 
-        with patch("src.agent.tools.RAGPipeline", side_effect=Exception("Index error"), create=True):
+        with patch(
+            "src.agent.tools.RAGPipeline", side_effect=Exception("Index error"), create=True
+        ):
             # The function has its own import, hard to mock
             # Just verify it doesn't crash with real index
             result = _search_financial_docs("teste")

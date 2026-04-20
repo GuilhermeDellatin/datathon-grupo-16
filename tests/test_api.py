@@ -1,7 +1,7 @@
 """Testes de endpoint da API FastAPI."""
 
+
 import pytest
-from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
 from src.serving.app import app

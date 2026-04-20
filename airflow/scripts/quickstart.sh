@@ -164,7 +164,7 @@ echo ""
 # 8. Modo debug (opcional)
 if [ "$1" == "--debug" ]; then
     log_info "Modo DEBUG ativado"
-    
+
     log_info "Verificando estrutura de pastas..."
     echo "DATA:"
     ls -la $PROJECT_ROOT/data/ || echo "  (não existe)"

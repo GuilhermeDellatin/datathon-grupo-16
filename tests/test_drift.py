@@ -1,7 +1,6 @@
 """Testes de drift detection."""
 
 import numpy as np
-import pytest
 
 from src.monitoring.drift import calculate_psi
 

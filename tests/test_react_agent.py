@@ -1,7 +1,8 @@
 """Testes do agente ReAct — mock OpenAI para não depender de API externa."""
 
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 from src.agent.react_agent import REACT_PROMPT, SYSTEM_PROMPT
 

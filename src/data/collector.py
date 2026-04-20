@@ -5,11 +5,12 @@ e salvar em formato parquet para processamento posterior.
 """
 
 import logging
-from pathlib import Path
 
 import pandas as pd
 import yaml
 import yfinance as yf
+
+from src.paths import resolve_project_file
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,8 @@ def load_config(config_path: str = "configs/model_config.yaml") -> dict:
     Returns:
         Dicionário com configurações.
     """
-    with open(config_path) as f:
+    config_file = resolve_project_file(config_path)
+    with open(config_file) as f:
         return yaml.safe_load(f)
 
 
@@ -73,9 +75,10 @@ def save_raw_data(df: pd.DataFrame, output_path: str = "data/raw/petr4_raw.parqu
         df: DataFrame com dados OHLCV.
         output_path: Caminho de saída.
     """
-    Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    df.to_parquet(output_path)
-    logger.info("Dados salvos em %s (%d registros)", output_path, len(df))
+    output_file = resolve_project_file(output_path)
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(output_file)
+    logger.info("Dados salvos em %s (%d registros)", output_file, len(df))
 
 
 def main() -> None:

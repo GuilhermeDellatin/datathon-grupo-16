@@ -1,7 +1,6 @@
 """Testes do modelo LSTM — arquitetura e inferência."""
 
 import torch
-import pytest
 
 from src.models.lstm_model import LSTMPredictor
 
@@ -41,9 +40,7 @@ class TestLSTMPredictor:
 
     def test_bidirectional(self):
         """Modelo bidirecional deve funcionar."""
-        model = LSTMPredictor(
-            input_size=5, hidden_size=16, num_layers=1, bidirectional=True
-        )
+        model = LSTMPredictor(input_size=5, hidden_size=16, num_layers=1, bidirectional=True)
         x = torch.randn(2, 30, 5)
         output = model(x)
         assert output.shape == (2, 1)
@@ -72,9 +69,7 @@ class TestLSTMPredictor:
 
     def test_dropout_train_vs_eval(self):
         """Modo eval deve desativar dropout (output determinístico)."""
-        model = LSTMPredictor(
-            input_size=5, hidden_size=16, num_layers=2, dropout=0.5
-        )
+        model = LSTMPredictor(input_size=5, hidden_size=16, num_layers=2, dropout=0.5)
         x = torch.randn(4, 10, 5)
 
         model.eval()
