@@ -3,7 +3,7 @@
 Implementa:
 - Treino com early stopping e gradient clipping
 - MLflow tracking: params, metrics, artifacts, tags obrigatórias
-- Model Registry: registro automático com metadata
+- Persistência de metadata para registro posterior no Model Registry
 - Champion-challenger: comparação antes de promover modelo
 """
 
@@ -420,10 +420,22 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
         joblib.dump(scaler, scaler_path)
         mlflow.log_artifact(str(scaler_path))
 
-        # Registrar no Model Registry
-        model_uri = f"runs:/{run.info.run_id}/model"
-        mv = mlflow.register_model(model_uri, config["mlflow"]["model_name"])
-        logger.info("Modelo registrado: %s v%s", mv.name, mv.version)
+        # Persistir metadata para a etapa de registro da DAG
+        training_metadata = {
+            "run_id": run.info.run_id,
+            "experiment_name": config["mlflow"]["experiment_name"],
+            "model_name": config["mlflow"]["model_name"],
+            "model_uri": f"runs:/{run.info.run_id}/model",
+            "artifact_model_path": str(model_path),
+            "artifact_scaler_path": str(scaler_path),
+            "metrics": metrics,
+        }
+        training_metadata_path = resolve_project_file("metrics/latest_training_run.json")
+        training_metadata_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(training_metadata_path, "w", encoding="utf-8") as f:
+            json.dump(training_metadata, f, indent=2)
+        mlflow.log_artifact(str(training_metadata_path))
+        logger.info("Metadata do treino salva em %s", training_metadata_path)
 
         return run.info.run_id
 

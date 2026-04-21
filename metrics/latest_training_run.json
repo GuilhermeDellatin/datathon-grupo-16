@@ -1,0 +1,14 @@
+{
+  "run_id": "f1311fe985eb42caad8222e685d75792",
+  "experiment_name": "datathon-petr4",
+  "model_name": "lstm-petr4",
+  "model_uri": "runs:/f1311fe985eb42caad8222e685d75792/model",
+  "artifact_model_path": "/home/iana/datathon-grupo-16/models/lstm_petr4_best.pt",
+  "artifact_scaler_path": "/home/iana/datathon-grupo-16/models/scaler.joblib",
+  "metrics": {
+    "mae": 0.027126139029860497,
+    "rmse": 0.03513516847022318,
+    "mape": 3.206084728240967,
+    "best_val_loss": 0.0011484480032169404
+  }
+}

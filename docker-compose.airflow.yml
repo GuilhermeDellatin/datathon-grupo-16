@@ -2,28 +2,46 @@ version: "3.8"
 
 services:
   airflow:
-    image: apache/airflow:2.9.0-python3.11
+    build:
+      context: .
+      dockerfile: src/serving/Dockerfile.airflow
     container_name: airflow_local
 
-    user: root   # 👈 ADICIONE ISSO
+    user: root
 
     ports:
       - "8080:8080"
 
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-      PROJECT_ROOT: /opt/project
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+      PROJECT_ROOT: /app
       MLFLOW_TRACKING_URI: http://host.docker.internal:5000
-      PYTHONPATH: /opt/project
+      PYTHONPATH: /app
 
     volumes:
       - ./airflow/dags:/opt/airflow/dags
-      - .:/opt/project
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./configs:/app/configs
 
-    working_dir: /opt/project
+    working_dir: /app
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
-    command: standalone
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create \
+        --username airflow \
+        --firstname Airflow \
+        --lastname Admin \
+        --role Admin \
+        --email airflow@example.com \
+        --password airflow || true &&
+      airflow scheduler & airflow webserver
+      "
