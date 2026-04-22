@@ -12,6 +12,7 @@ from airflow.exceptions import AirflowException, AirflowSkipException
 from airflow.models.baseoperator import chain
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
+from airflow.utils.trigger_rule import TriggerRule
 
 logger = logging.getLogger(__name__)
 
@@ -172,6 +173,7 @@ with DAG(
     drift = PythonOperator(
         task_id="drift_detection",
         python_callable=check_drift_detection,
+        trigger_rule=TriggerRule.NONE_FAILED,
     )
 
     train = PythonOperator(
@@ -192,6 +194,7 @@ with DAG(
     register = PythonOperator(
         task_id="register_model",
         python_callable=register_model,
+        trigger_rule=TriggerRule.NONE_FAILED,
     )
 
     report = PythonOperator(
@@ -206,11 +209,11 @@ with DAG(
         collect,
         validate_data,
         features,
-        drift,
         train,
-        # validate_model,
         evaluate,
+        drift,
         register,
+        # validate_model,
         report,
         end,
     )
