@@ -19,16 +19,19 @@ services:
       _AIRFLOW_WWW_USER_USERNAME: admin
       _AIRFLOW_WWW_USER_PASSWORD: admin
       PROJECT_ROOT: /app
-      MLFLOW_TRACKING_URI: http://host.docker.internal:5000
+      MLFLOW_TRACKING_URI: file:///opt/airflow/mlruns
       PYTHONPATH: /app
 
     volumes:
       - ./airflow/dags:/opt/airflow/dags
-      - ./src:/app/src
-      - ./data:/app/data
-      - ./configs:/app/configs
+      - ./src:/opt/airflow/src
+      - ./data:/opt/airflow/data
+      - ./configs:/opt/airflow/configs
+      - ./models:/opt/airflow/models
+      - ./metrics:/opt/airflow/metrics
+      - ./mlruns:/opt/airflow/mlruns
 
-    working_dir: /app
+    working_dir: /opt/airflow
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
