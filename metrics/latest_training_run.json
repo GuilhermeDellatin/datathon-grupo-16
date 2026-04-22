@@ -1,14 +1,14 @@
 {
-  "run_id": "437c00e51af6419c972fd4d707b19903",
+  "run_id": "d689eada46d247e8ba8d4c7ed226ab91",
   "experiment_name": "datathon-petr4",
   "model_name": "lstm-petr4",
-  "model_uri": "runs:/437c00e51af6419c972fd4d707b19903/model",
+  "model_uri": "runs:/d689eada46d247e8ba8d4c7ed226ab91/model",
   "artifact_model_path": "/opt/airflow/models/lstm_petr4_best.pt",
   "artifact_scaler_path": "/opt/airflow/models/scaler.joblib",
   "metrics": {
-    "mae": 0.04685144126415253,
-    "rmse": 0.05516296845601753,
-    "mape": 5.431270599365234,
-    "best_val_loss": 0.0011432519155170988
+    "mae": 0.07409205287694931,
+    "rmse": 0.08227174564064071,
+    "mape": 8.884330838918686,
+    "best_val_loss": 0.0011083134997855214
   }
 }

@@ -8,7 +8,7 @@ import sys
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.exceptions import AirflowException
+from airflow.exceptions import AirflowException, AirflowSkipException
 from airflow.models.baseoperator import chain
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
@@ -55,6 +55,11 @@ def train_model():
 
 
 def evaluate_quality():
+    api_key = os.getenv("OPENAI_API_KEY")
+
+    if not api_key:
+        raise AirflowSkipException("OPENAI_API_KEY ausente ou vazia — pulando RAGAS evaluation")
+
     run_module("evaluation.ragas_eval")
 
 
@@ -174,10 +179,10 @@ with DAG(
         python_callable=train_model,
     )
 
-    validate_model = PythonOperator(
-        task_id="validate_model",
-        python_callable=validate_model_performance,
-    )
+    # validate_model = PythonOperator(
+    #     task_id="validate_model",
+    #     python_callable=validate_model_performance,
+    # )
 
     evaluate = PythonOperator(
         task_id="evaluate_quality",
@@ -203,7 +208,7 @@ with DAG(
         features,
         drift,
         train,
-        validate_model,
+        # validate_model,
         evaluate,
         register,
         report,

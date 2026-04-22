@@ -21,10 +21,12 @@ services:
       PROJECT_ROOT: /app
       MLFLOW_TRACKING_URI: file:///opt/airflow/mlruns
       PYTHONPATH: /app
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
 
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
+      - ./evaluation:/opt/airflow/evaluation
       - ./data:/opt/airflow/data
       - ./configs:/opt/airflow/configs
       - ./models:/opt/airflow/models
