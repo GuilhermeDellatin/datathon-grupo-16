@@ -94,7 +94,7 @@ class RAGPipeline:
     def _load_documents(self) -> list[Document]:
         """Carrega documentos de múltiplos formatos."""
         docs_path = Path(self.docs_dir)
-        documents = []
+        documents: list[Document] = []
 
         if not docs_path.exists():
             logger.warning("Diretório %s não encontrado", self.docs_dir)
@@ -103,24 +103,24 @@ class RAGPipeline:
         # Carregar PDFs
         for pdf_file in docs_path.glob("**/*.pdf"):
             try:
-                loader = PyPDFLoader(str(pdf_file))
-                documents.extend(loader.load())
+                pdf_loader = PyPDFLoader(str(pdf_file))
+                documents.extend(pdf_loader.load())
             except Exception as e:
                 logger.warning("Erro ao carregar %s: %s", pdf_file, e)
 
         # Carregar Markdown
         for md_file in docs_path.glob("**/*.md"):
             try:
-                loader = TextLoader(str(md_file), encoding="utf-8")
-                documents.extend(loader.load())
+                md_loader = TextLoader(str(md_file), encoding="utf-8")
+                documents.extend(md_loader.load())
             except Exception as e:
                 logger.warning("Erro ao carregar %s: %s", md_file, e)
 
         # Carregar TXT
         for txt_file in docs_path.glob("**/*.txt"):
             try:
-                loader = TextLoader(str(txt_file), encoding="utf-8")
-                documents.extend(loader.load())
+                txt_loader = TextLoader(str(txt_file), encoding="utf-8")
+                documents.extend(txt_loader.load())
             except Exception as e:
                 logger.warning("Erro ao carregar %s: %s", txt_file, e)
 

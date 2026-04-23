@@ -73,7 +73,7 @@ class StockPredictor:
         x = torch.FloatTensor(input_data).unsqueeze(0).to(self.device)
         with torch.no_grad():
             pred = self.model(x).squeeze().item()
-        return pred
+        return float(pred)
 
     def predict_from_dataframe(self, df: pd.DataFrame) -> dict[str, float]:
         """Predição a partir de DataFrame com features.

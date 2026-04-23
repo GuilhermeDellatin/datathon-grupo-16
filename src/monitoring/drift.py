@@ -14,6 +14,7 @@ Referência Datathon:
 import json
 import logging
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -34,7 +35,8 @@ def load_monitoring_config(config_path: str = "configs/monitoring_config.yaml") 
         Dicionário com configurações.
     """
     with open(config_path) as f:
-        return yaml.safe_load(f)
+        config: dict = yaml.safe_load(f)
+    return config
 
 
 def calculate_psi(
@@ -100,7 +102,11 @@ def run_drift_detection(
         if f in reference_data.columns and f in current_data.columns
     ]
 
-    results = {"features": {}, "overall_drift": False, "retrain_needed": False}
+    results: dict[str, Any] = {
+        "features": {},
+        "overall_drift": False,
+        "retrain_needed": False,
+    }
 
     # PSI por feature
     for feature in common_features:
