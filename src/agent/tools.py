@@ -210,7 +210,7 @@ search_docs_tool = Tool(
         "Busca informações em documentos financeiros indexados sobre a Petrobras, "
         "incluindo relatórios, análises de mercado e documentação do modelo. "
         "Use quando o usuário fizer perguntas sobre a empresa, resultados financeiros, "
-        "estratégia, governança, ou sobre o próprio modelo preditivo."
+        "política de dividendos, estratégia, governança, ou sobre o próprio modelo preditivo."
     ),
 )
 
