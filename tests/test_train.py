@@ -121,9 +121,9 @@ class TestTrainEpoch:
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
         device = torch.device("cpu")
 
-        X = torch.randn(20, 10, 3)
+        x = torch.randn(20, 10, 3)
         y = torch.randn(20)
-        dataset = TensorDataset(X, y)
+        dataset = TensorDataset(x, y)
         dataloader = DataLoader(dataset, batch_size=5, shuffle=False)
 
         return model, dataloader, criterion, optimizer, device

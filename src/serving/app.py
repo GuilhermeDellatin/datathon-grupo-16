@@ -198,7 +198,7 @@ async def predict(request: PredictionRequest) -> PredictionResponse:
     except Exception as e:
         PREDICTION_REQUESTS.labels(ticker=request.ticker, status="error").inc()
         logger.error("Erro na predição: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/agent", response_model=AgentResponse)
@@ -244,7 +244,7 @@ async def agent_query(request: AgentRequest) -> AgentResponse:
     except Exception as e:
         AGENT_REQUESTS.labels(status="error").inc()
         logger.error("Erro no agente: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.get("/metrics")
