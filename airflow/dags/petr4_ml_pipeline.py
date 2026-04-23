@@ -37,7 +37,11 @@ MIN_DATA_QUALITY = 0.85
 def run_module(module_name: str):
     """Executa módulo python como subprocess leve."""
     logger.info(f"Executando módulo: {module_name}")
-    subprocess.run([sys.executable, "-m", module_name], check=True)  # nosec B603
+    subprocess.run(
+        [sys.executable, "-m", module_name],
+        check=True,
+        cwd="/opt/airflow"
+    )  # nosec B603
 
 
 # ==================== Tasks ====================
