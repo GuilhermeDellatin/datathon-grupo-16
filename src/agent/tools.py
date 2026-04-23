@@ -9,7 +9,6 @@
 
 import logging
 
-import numpy as np
 import pandas as pd
 import yfinance as yf
 from langchain_core.tools import Tool
@@ -241,6 +240,8 @@ def _compare_model_versions(query: str) -> str:
         result = f"Versões do modelo '{model_name}':\n\n"
 
         for v in sorted(versions, key=lambda x: int(x.version), reverse=True)[:5]:
+            if v.run_id is None:
+                continue
             run = client.get_run(v.run_id)
             metrics = run.data.metrics
 

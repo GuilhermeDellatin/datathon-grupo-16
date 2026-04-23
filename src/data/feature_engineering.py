@@ -14,7 +14,6 @@ import pandera as pa
 import ta
 import yaml
 from pandera import Check, Column, DataFrameSchema
-from sklearn.preprocessing import MinMaxScaler
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +61,8 @@ def load_config(config_path: str = "configs/model_config.yaml") -> dict:
         Dicionário com configurações.
     """
     with open(config_path) as f:
-        return yaml.safe_load(f)
+        config: dict = yaml.safe_load(f)
+    return config
 
 
 def validate_raw_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -167,13 +167,14 @@ def create_sequences(
         Tupla (X, y) onde X.shape = (n_samples, sequence_length, n_features)
         e y.shape = (n_samples,).
     """
-    X, y = [], []
+    X_list: list = []
+    y_list: list = []
     for i in range(sequence_length, len(data) - prediction_horizon + 1):
-        X.append(data[i - sequence_length : i])
-        y.append(data[i + prediction_horizon - 1, target_idx])
+        X_list.append(data[i - sequence_length : i])
+        y_list.append(data[i + prediction_horizon - 1, target_idx])
 
-    X = np.array(X, dtype=np.float32)
-    y = np.array(y, dtype=np.float32)
+    X = np.array(X_list, dtype=np.float32)
+    y = np.array(y_list, dtype=np.float32)
 
     logger.info(
         "Sequências criadas: X=%s, y=%s (seq_len=%d, horizon=%d)",
@@ -225,7 +226,6 @@ def main() -> None:
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     )
 
-    config = load_config()
     raw_path = "data/raw/petr4_raw.parquet"
     output_path = "data/processed/petr4_features.parquet"
 

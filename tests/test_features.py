@@ -2,11 +2,9 @@
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from src.data.feature_engineering import (
     compute_features,
-    compute_technical_indicators,
     create_sequences,
     split_data,
 )
@@ -68,7 +66,6 @@ class TestCreateSequences:
         """X e y devem ter shapes corretos."""
         data = np.random.randn(100, 5).astype(np.float32)
         X, y = create_sequences(data, sequence_length=10, prediction_horizon=1)
-
         assert X.shape == (90, 10, 5)
         assert y.shape == (90,)
 
@@ -76,7 +73,6 @@ class TestCreateSequences:
         """Cada sequência deve ter o tamanho correto."""
         data = np.random.randn(50, 3).astype(np.float32)
         X, _ = create_sequences(data, sequence_length=20)
-
         assert X.shape[1] == 20
 
     def test_prediction_horizon(self):

@@ -24,7 +24,8 @@ def load_config(config_path: str = "configs/model_config.yaml") -> dict:
         Dicionário com configurações.
     """
     with open(config_path) as f:
-        return yaml.safe_load(f)
+        config: dict = yaml.safe_load(f)
+    return config
 
 
 def collect_stock_data(

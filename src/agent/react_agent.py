@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from langchain_classic.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 
 from src.agent.tools import ALL_TOOLS
 
@@ -78,7 +79,7 @@ def create_stock_agent(
     llm = ChatOpenAI(
         model=model_name,
         temperature=temperature,
-        api_key=api_key,
+        api_key=SecretStr(api_key),
     )
 
     tools = ALL_TOOLS

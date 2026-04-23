@@ -149,7 +149,7 @@ def train_epoch(
         optimizer.step()
         total_loss += loss.item() * len(X_batch)
 
-    return total_loss / len(dataloader.dataset)
+    return float(total_loss / len(dataloader.dataset))  # type: ignore[arg-type,operator]
 
 
 def evaluate_epoch(
@@ -179,7 +179,7 @@ def evaluate_epoch(
             loss = criterion(output, y_batch)
             total_loss += loss.item() * len(X_batch)
 
-    return total_loss / len(dataloader.dataset)
+    return float(total_loss / len(dataloader.dataset))  # type: ignore[arg-type,operator]
 
 
 # --- Main Training Pipeline ---
@@ -230,7 +230,6 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
     seq_len = config["features"]["sequence_length"]
     horizon = config["features"]["prediction_horizon"]
     X, y = create_sequences(data_scaled, seq_len, horizon, target_idx=0)
-
     # Split temporal
     splits = split_data(X, y, config["data"]["train_split"], config["data"]["validation_split"])
 
@@ -281,9 +280,10 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
         # Tags obrigatórias (Schema do GAP 05)
         tags = config["mlflow"]["tags"].copy()
         tags["git_sha"] = get_git_sha()
-        tags["training_data_version"] = hashlib.md5(
-            open("data/processed/petr4_features.parquet", "rb").read()[:4096]
-        ).hexdigest()[:8]
+        with open("data/processed/petr4_features.parquet", "rb") as _features_file:
+            tags["training_data_version"] = hashlib.md5(
+                _features_file.read(4096), usedforsecurity=False
+            ).hexdigest()[:8]
         tags["fairness_checked"] = "false"
         for k, v in tags.items():
             mlflow.set_tag(k, str(v))
@@ -357,6 +357,7 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
                 break
 
         # --- Avaliar no test set ---
+        assert best_model_state is not None, "Nenhum checkpoint válido encontrado"
         model.load_state_dict(best_model_state)
         model.eval()
 
@@ -423,7 +424,7 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
         mv = mlflow.register_model(model_uri, config["mlflow"]["model_name"])
         logger.info("Modelo registrado: %s v%s", mv.name, mv.version)
 
-        return run.info.run_id
+        return str(run.info.run_id)
 
 
 # --- Champion-Challenger ---
@@ -480,7 +481,7 @@ def champion_challenger(
         improvement * 100,
     )
 
-    return improvement >= min_improvement
+    return bool(improvement >= min_improvement)
 
 
 def main() -> None:

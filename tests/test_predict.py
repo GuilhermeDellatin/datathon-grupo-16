@@ -1,9 +1,9 @@
 """Testes do módulo de inferência — StockPredictor com mock checkpoint."""
 
+
 import numpy as np
 import pandas as pd
 import pytest
-import tempfile
 import torch
 
 from src.models.lstm_model import LSTMPredictor

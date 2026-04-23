@@ -5,7 +5,6 @@ Isolado do pipeline de treinamento (sem acoplamento).
 """
 
 import logging
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -31,7 +30,9 @@ class StockPredictor:
     ):
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
 
-        checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
+        checkpoint = torch.load(
+            model_path, map_location=self.device, weights_only=False
+        )
 
         self.feature_columns = checkpoint["feature_columns"]
         self.sequence_length = checkpoint["sequence_length"]
@@ -74,7 +75,7 @@ class StockPredictor:
         x = torch.FloatTensor(input_data).unsqueeze(0).to(self.device)
         with torch.no_grad():
             pred = self.model(x).squeeze().item()
-        return pred
+        return float(pred)
 
     def predict_from_dataframe(self, df: pd.DataFrame) -> dict[str, float]:
         """Predição a partir de DataFrame com features.
