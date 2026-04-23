@@ -34,10 +34,7 @@ def _has_encoding_attack(text: str) -> bool:
         r"&#\d+;",
         r"&#x[0-9a-fA-F]+;",
     ]
-    for pattern in suspicious_patterns:
-        if re.search(pattern, text):
-            return True
-    return False
+    return any(re.search(pattern, text) for pattern in suspicious_patterns)
 
 
 class InputGuardrail:
@@ -188,8 +185,10 @@ class OutputGuardrail:
                 "previsão", "predição", "prevê", "preço futuro", "vai subir", "vai cair",
             ]
 
-            if any(kw in output.lower() for kw in prediction_keywords):
-                if "não constitui recomendação" not in output.lower():
-                    output += disclaimer
+            if (
+                any(kw in output.lower() for kw in prediction_keywords)
+                and "não constitui recomendação" not in output.lower()
+            ):
+                output += disclaimer
 
         return output

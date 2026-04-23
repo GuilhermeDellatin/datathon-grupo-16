@@ -14,7 +14,6 @@ import pandera as pa
 import ta
 import yaml
 from pandera import Check, Column, DataFrameSchema
-from sklearn.preprocessing import MinMaxScaler
 
 logger = logging.getLogger(__name__)
 
@@ -225,7 +224,6 @@ def main() -> None:
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     )
 
-    config = load_config()
     raw_path = "data/raw/petr4_raw.parquet"
     output_path = "data/processed/petr4_features.parquet"
 

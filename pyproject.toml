@@ -87,7 +87,9 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
-ignore = ["E501"]
+# N803/N806: convenção ML — `X` (features matrix, maiúscula) e `y` (target vector)
+# seguem padrão scikit-learn/PyTorch; renomear para minúscula quebraria legibilidade.
+ignore = ["E501", "N803", "N806"]
 
 [tool.mypy]
 python_version = "3.11"

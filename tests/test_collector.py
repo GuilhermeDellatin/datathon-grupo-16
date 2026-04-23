@@ -1,9 +1,10 @@
 """Testes do coletor de dados — mock yfinance."""
 
+from unittest.mock import patch
+
 import numpy as np
 import pandas as pd
 import pytest
-from unittest.mock import patch, MagicMock
 
 from src.data.collector import collect_stock_data, save_raw_data
 

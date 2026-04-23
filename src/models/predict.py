@@ -5,7 +5,6 @@ Isolado do pipeline de treinamento (sem acoplamento).
 """
 
 import logging
-from pathlib import Path
 
 import numpy as np
 import pandas as pd

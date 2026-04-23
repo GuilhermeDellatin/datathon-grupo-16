@@ -1,7 +1,6 @@
 """Testes do modelo LSTM — arquitetura e inferência."""
 
 import torch
-import pytest
 
 from src.models.lstm_model import LSTMPredictor
 

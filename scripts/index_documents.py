@@ -15,8 +15,8 @@ def main() -> None:
     if index_path.exists():
         shutil.rmtree(index_path)
 
-    rag = RAGPipeline(docs_dir="data/rag_documents")
-    print(f"Índice criado com sucesso em data/rag_index/")
+    RAGPipeline(docs_dir="data/rag_documents")
+    print("Índice criado com sucesso em data/rag_index/")
 
 
 if __name__ == "__main__":

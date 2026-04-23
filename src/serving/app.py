@@ -223,7 +223,7 @@ async def predict(request: PredictionRequest) -> PredictionResponse:
     except Exception as e:
         PREDICTION_REQUESTS.labels(ticker=request.ticker, status="error").inc()
         logger.error("Erro na predição: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @app.post("/agent", response_model=AgentResponse)
@@ -269,7 +269,7 @@ async def agent_query(request: AgentRequest) -> AgentResponse:
     except Exception as e:
         AGENT_REQUESTS.labels(status="error").inc()
         logger.error("Erro no agente: %s", e)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 def _run_training_task() -> None:
@@ -377,7 +377,7 @@ async def infer_raw(request: InferRequest) -> InferResponse:
     except Exception as exc:
         PREDICTION_REQUESTS.labels(ticker="RAW", status="error").inc()
         logger.error("Erro na inferência raw: %s", exc, exc_info=True)
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
     finally:
         PREDICTION_LATENCY.observe(time.time() - start_time)
 
