@@ -282,7 +282,7 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
         tags["git_sha"] = get_git_sha()
         with open("data/processed/petr4_features.parquet", "rb") as _features_file:
             tags["training_data_version"] = hashlib.md5(
-                _features_file.read(4096)
+                _features_file.read(4096), usedforsecurity=False
             ).hexdigest()[:8]
         tags["fairness_checked"] = "false"
         for k, v in tags.items():

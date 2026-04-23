@@ -30,7 +30,9 @@ class StockPredictor:
     ):
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
 
-        checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
+        checkpoint = torch.load(
+            model_path, map_location=self.device, weights_only=False
+        )
 
         self.feature_columns = checkpoint["feature_columns"]
         self.sequence_length = checkpoint["sequence_length"]
