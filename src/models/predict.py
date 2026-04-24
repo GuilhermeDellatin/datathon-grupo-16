@@ -5,6 +5,7 @@ Isolado do pipeline de treinamento (sem acoplamento).
 """
 
 import logging
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -32,9 +33,12 @@ class StockPredictor:
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
         resolved_model_path = resolve_project_file(model_path)
 
-        checkpoint = torch.load(
-            model_path, map_location=self.device, weights_only=False
-        )
+        if not Path(resolved_model_path).exists():
+            raise FileNotFoundError(
+                f"Modelo nao encontrado em '{resolved_model_path}'. Execute 'make train' para treinar e gerar o checkpoint."
+            )
+
+        checkpoint = torch.load(resolved_model_path, map_location=self.device, weights_only=False)
 
         self.feature_columns = checkpoint["feature_columns"]
         self.sequence_length = checkpoint["sequence_length"]
