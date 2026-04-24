@@ -164,8 +164,8 @@ def create_sequences(
         target_idx: Índice da coluna target no array.
 
     Returns:
-        Tupla (x_data, y_data) onde x_data.shape = (n_samples, sequence_length, n_features)
-        e y_data.shape = (n_samples,).
+        Tupla (X, y) onde X.shape = (n_samples, sequence_length, n_features)
+        e y.shape = (n_samples,).
     """
     X_list: list = []
     y_list: list = []
@@ -178,16 +178,16 @@ def create_sequences(
 
     logger.info(
         "Sequências criadas: X=%s, y=%s (seq_len=%d, horizon=%d)",
-        x_data.shape,
-        y_data.shape,
+        X.shape,
+        y.shape,
         sequence_length,
         prediction_horizon,
     )
-    return x_data, y_data
+    return X, y
 
 
 def split_data(
-    x_data: np.ndarray,
+    X: np.ndarray,
     y: np.ndarray,
     train_ratio: float = 0.8,
     val_ratio: float = 0.1,
@@ -203,18 +203,18 @@ def split_data(
     Returns:
         Dicionário com splits: train, val, test.
     """
-    n = len(x_data)
+    n = len(X)
     train_end = int(n * train_ratio)
     val_end = int(n * (train_ratio + val_ratio))
 
     splits = {
-        "train": (x_data[:train_end], y[:train_end]),
-        "val": (x_data[train_end:val_end], y[train_end:val_end]),
-        "test": (x_data[val_end:], y[val_end:]),
+        "train": (X[:train_end], y[:train_end]),
+        "val": (X[train_end:val_end], y[train_end:val_end]),
+        "test": (X[val_end:], y[val_end:]),
     }
 
-    for name, (x_split, y_split) in splits.items():
-        logger.info("Split %s: X=%s, y=%s", name, x_split.shape, y_split.shape)
+    for name, (Xi, yi) in splits.items():
+        logger.info("Split %s: X=%s, y=%s", name, Xi.shape, yi.shape)
 
     return splits
 

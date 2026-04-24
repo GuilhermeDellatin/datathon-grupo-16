@@ -3,14 +3,15 @@
 Implementa:
 - Treino com early stopping e gradient clipping
 - MLflow tracking: params, metrics, artifacts, tags obrigatórias
-- Persistência de metadata para registro posterior no Model Registry
+- Model Registry: registro automático com metadata
 - Champion-challenger: comparação antes de promover modelo
 """
 
 import hashlib
 import json
 import logging
-import subprocess  # nosec B404
+import subprocess
+from pathlib import Path
 
 import joblib
 import mlflow
@@ -25,7 +26,6 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from src.data.feature_engineering import create_sequences, load_config, split_data
 from src.models.lstm_model import LSTMPredictor
-from src.paths import resolve_project_file
 
 logger = logging.getLogger(__name__)
 
@@ -97,8 +97,7 @@ class EarlyStopping:
 def get_git_sha() -> str:
     """Retorna o SHA do commit atual."""
     try:
-        # Usamos o nosec para B603 e B607 porque o comando é estático e seguro
-        result = subprocess.run(  # nosec B603 B607
+        result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             capture_output=True,
             text=True,
@@ -136,11 +135,11 @@ def train_epoch(
     model.train()
     total_loss = 0.0
 
-    for x_batch, y_batch in dataloader:
-        x_batch, y_batch = x_batch.to(device), y_batch.to(device)
+    for X_batch, y_batch in dataloader:
+        X_batch, y_batch = X_batch.to(device), y_batch.to(device)
 
         optimizer.zero_grad()
-        output = model(x_batch).squeeze(-1)
+        output = model(X_batch).squeeze(-1)
         loss = criterion(output, y_batch)
         loss.backward()
 
@@ -148,7 +147,7 @@ def train_epoch(
         torch.nn.utils.clip_grad_norm_(model.parameters(), clip_value)
 
         optimizer.step()
-        total_loss += loss.item() * len(x_batch)
+        total_loss += loss.item() * len(X_batch)
 
     return float(total_loss / len(dataloader.dataset))  # type: ignore[arg-type,operator]
 
@@ -174,11 +173,11 @@ def evaluate_epoch(
     total_loss = 0.0
 
     with torch.no_grad():
-        for x_batch, y_batch in dataloader:
-            x_batch, y_batch = x_batch.to(device), y_batch.to(device)
-            output = model(x_batch).squeeze(-1)
+        for X_batch, y_batch in dataloader:
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+            output = model(X_batch).squeeze(-1)
             loss = criterion(output, y_batch)
-            total_loss += loss.item() * len(x_batch)
+            total_loss += loss.item() * len(X_batch)
 
     return float(total_loss / len(dataloader.dataset))  # type: ignore[arg-type,operator]
 
@@ -198,10 +197,9 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
     config = load_config(config_path)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info("Device: %s", device)
-    features_path = resolve_project_file("data/processed/petr4_features.parquet")
 
     # --- Carregar dados ---
-    df = pd.read_parquet(features_path)
+    df = pd.read_parquet("data/processed/petr4_features.parquet")
 
     feature_cols = [
         "Close",
@@ -233,16 +231,16 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
     horizon = config["features"]["prediction_horizon"]
     X, y = create_sequences(data_scaled, seq_len, horizon, target_idx=0)
     # Split temporal
-    splits = split_data(
-        x_data, y, config["data"]["train_split"], config["data"]["validation_split"]
-    )
+    splits = split_data(X, y, config["data"]["train_split"], config["data"]["validation_split"])
 
     # DataLoaders
     batch_size = config["training"]["batch_size"]
     train_ds = TensorDataset(
         torch.FloatTensor(splits["train"][0]), torch.FloatTensor(splits["train"][1])
     )
-    val_ds = TensorDataset(torch.FloatTensor(splits["val"][0]), torch.FloatTensor(splits["val"][1]))
+    val_ds = TensorDataset(
+        torch.FloatTensor(splits["val"][0]), torch.FloatTensor(splits["val"][1])
+    )
     test_ds = TensorDataset(
         torch.FloatTensor(splits["test"][0]), torch.FloatTensor(splits["test"][1])
     )
@@ -365,9 +363,9 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
 
         all_preds, all_targets = [], []
         with torch.no_grad():
-            for x_batch, y_batch in test_loader:
-                x_batch = x_batch.to(device)
-                preds = model(x_batch).squeeze(-1).cpu().numpy()
+            for X_batch, y_batch in test_loader:
+                X_batch = X_batch.to(device)
+                preds = model(X_batch).squeeze(-1).cpu().numpy()
                 all_preds.extend(preds)
                 all_targets.extend(y_batch.numpy())
 
@@ -387,8 +385,8 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
 
         # --- Salvar artefatos ---
         # Modelo
-        model_path = resolve_project_file("models/lstm_petr4_best.pt")
-        model_path.parent.mkdir(parents=True, exist_ok=True)
+        model_path = "models/lstm_petr4_best.pt"
+        Path(model_path).parent.mkdir(parents=True, exist_ok=True)
         torch.save(
             {
                 "model_state_dict": best_model_state,
@@ -406,37 +404,25 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
             model_path,
         )
 
-        mlflow.log_artifact(str(model_path))
+        mlflow.log_artifact(model_path)
         mlflow.pytorch.log_model(model, "model")
 
         # Métricas em JSON
-        metrics_path = resolve_project_file("metrics/train_metrics.json")
-        metrics_path.parent.mkdir(parents=True, exist_ok=True)
+        metrics_path = "metrics/train_metrics.json"
+        Path(metrics_path).parent.mkdir(parents=True, exist_ok=True)
         with open(metrics_path, "w") as f:
             json.dump(metrics, f, indent=2)
-        mlflow.log_artifact(str(metrics_path))
+        mlflow.log_artifact(metrics_path)
 
         # Scaler
-        scaler_path = resolve_project_file("models/scaler.joblib")
+        scaler_path = "models/scaler.joblib"
         joblib.dump(scaler, scaler_path)
-        mlflow.log_artifact(str(scaler_path))
+        mlflow.log_artifact(scaler_path)
 
-        # Persistir metadata para a etapa de registro da DAG
-        training_metadata = {
-            "run_id": run.info.run_id,
-            "experiment_name": config["mlflow"]["experiment_name"],
-            "model_name": config["mlflow"]["model_name"],
-            "model_uri": f"runs:/{run.info.run_id}/model",
-            "artifact_model_path": str(model_path),
-            "artifact_scaler_path": str(scaler_path),
-            "metrics": metrics,
-        }
-        training_metadata_path = resolve_project_file("metrics/latest_training_run.json")
-        training_metadata_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(training_metadata_path, "w", encoding="utf-8") as f:
-            json.dump(training_metadata, f, indent=2)
-        mlflow.log_artifact(str(training_metadata_path))
-        logger.info("Metadata do treino salva em %s", training_metadata_path)
+        # Registrar no Model Registry
+        model_uri = f"runs:/{run.info.run_id}/model"
+        mv = mlflow.register_model(model_uri, config["mlflow"]["model_name"])
+        logger.info("Modelo registrado: %s v%s", mv.name, mv.version)
 
         return str(run.info.run_id)
 
