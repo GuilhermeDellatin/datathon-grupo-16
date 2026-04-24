@@ -207,7 +207,7 @@ search_docs_tool = Tool(
         "Busca informações em documentos financeiros indexados sobre a Petrobras, "
         "incluindo relatórios, análises de mercado e documentação do modelo. "
         "Use quando o usuário fizer perguntas sobre a empresa, resultados financeiros, "
-        "estratégia, governança, ou sobre o próprio modelo preditivo."
+        "política de dividendos, estratégia, governança, ou sobre o próprio modelo preditivo."
     ),
 )
 
@@ -238,6 +238,8 @@ def _compare_model_versions(query: str) -> str:
         result = f"Versões do modelo '{model_name}':\n\n"
 
         for v in sorted(versions, key=lambda x: int(x.version), reverse=True)[:5]:
+            if v.run_id is None:
+                continue
             run = client.get_run(v.run_id)
             metrics = run.data.metrics
 

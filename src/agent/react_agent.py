@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from langchain_classic.agents import AgentExecutor, create_react_agent
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 
 from src.agent.tools import ALL_TOOLS
 
@@ -27,10 +28,12 @@ documentação financeira indexada e histórico de versões do modelo.
 
 REGRAS IMPORTANTES:
 1. Sempre que fizer uma predição de preço, inclua o aviso de que NÃO é recomendação de investimento.
-2. Use dados reais do mercado para contextualizar suas análises.
-3. Quando buscar documentos, sintetize as informações de forma clara.
-4. Se não tiver certeza de algo, diga explicitamente.
-5. Responda SEMPRE em português brasileiro.
+2. NUNCA faça recomendações explícitas de compra, venda ou manutenção de ativos. Mantenha uma postura estritamente neutra e analítica.
+3. Use dados reais do mercado para contextualizar suas análises.
+4. Quando buscar documentos, sintetize as informações de forma clara.
+5. Se não tiver certeza de algo, diga explicitamente.
+6. Responda SEMPRE em português brasileiro.
+7. OBRIGATÓRIO: Sempre que o usuário mencionar "dividendos", "políticas", "estratégia" ou "governança", você DEVE usar a ferramenta 'search_financial_docs'. Não use seu conhecimento pré-treinado para essas informações.
 
 Ferramentas disponíveis:
 {tools}
@@ -76,7 +79,7 @@ def create_stock_agent(
     llm = ChatOpenAI(
         model=model_name,
         temperature=temperature,
-        api_key=api_key,
+        api_key=SecretStr(api_key),
     )
 
     tools = ALL_TOOLS

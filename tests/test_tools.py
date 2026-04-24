@@ -65,8 +65,9 @@ class TestSearchFinancialDocs:
             Document(page_content="Petrobras é uma empresa...", metadata={"source": "test.md"})
         ]
 
-        with patch("src.agent.rag_pipeline.RAGPipeline", return_value=mock_rag), patch(
-            "src.agent.tools.RAGPipeline", return_value=mock_rag, create=True
+        with (
+            patch("src.agent.rag_pipeline.RAGPipeline", return_value=mock_rag),
+            patch("src.agent.tools.RAGPipeline", return_value=mock_rag, create=True),
         ):
             pass
 

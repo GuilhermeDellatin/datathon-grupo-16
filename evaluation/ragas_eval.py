@@ -14,7 +14,10 @@ import logging
 from pathlib import Path
 
 from datasets import Dataset
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from ragas import evaluate
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from ragas.llms import LangchainLLMWrapper
 from ragas.metrics import (
     answer_relevancy,
     context_precision,
@@ -103,6 +106,11 @@ def evaluate_rag_pipeline(
 
     dataset = Dataset.from_list(results)
 
+    llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o-mini", temperature=0))
+    embeddings = LangchainEmbeddingsWrapper(
+        OpenAIEmbeddings(model="text-embedding-3-small")
+    )
+
     # Avaliação RAGAS — 4 métricas obrigatórias
     scores = evaluate(
         dataset,
@@ -112,13 +120,16 @@ def evaluate_rag_pipeline(
             context_precision,
             context_recall,
         ],
+        llm=llm,
+        embeddings=embeddings,
     )
 
+    df = scores.to_pandas()
     metrics = {
-        "faithfulness": float(scores["faithfulness"]),
-        "answer_relevancy": float(scores["answer_relevancy"]),
-        "context_precision": float(scores["context_precision"]),
-        "context_recall": float(scores["context_recall"]),
+        "faithfulness": float(df["faithfulness"].mean(skipna=True)),
+        "answer_relevancy": float(df["answer_relevancy"].mean(skipna=True)),
+        "context_precision": float(df["context_precision"].mean(skipna=True)),
+        "context_recall": float(df["context_recall"].mean(skipna=True)),
         "n_samples": len(golden_set),
     }
 

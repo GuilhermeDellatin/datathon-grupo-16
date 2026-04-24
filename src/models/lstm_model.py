@@ -80,7 +80,7 @@ class LSTMPredictor(nn.Module):
 
         out = self.dropout(last_output)
         out = self.fc(out)
-        return out
+        return torch.as_tensor(out)
 
     def predict(self, x: torch.Tensor) -> torch.Tensor:
         """Inferência sem gradiente.

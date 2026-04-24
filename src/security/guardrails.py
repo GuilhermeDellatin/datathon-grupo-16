@@ -15,6 +15,7 @@ Referência: OWASP Top 10 for LLM Applications (2025)
 
 import logging
 import re
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +112,8 @@ class OutputGuardrail:
 
     def __init__(self, language: str = "pt"):
         self.language = language
-        self._analyzer = None
-        self._anonymizer = None
+        self._analyzer: Any = None
+        self._anonymizer: Any = None
 
     def _init_presidio(self) -> None:
         """Lazy init do Presidio (pesado para importar)."""
@@ -159,7 +160,7 @@ class OutputGuardrail:
                     text=llm_output,
                     analyzer_results=results,
                 )
-                return anonymized.text
+                return str(anonymized.text)
 
         except Exception as e:
             logger.error("Erro no sanitize de output: %s", e)
@@ -185,7 +186,10 @@ class OutputGuardrail:
                 "previsão", "predição", "prevê", "preço futuro", "vai subir", "vai cair",
             ]
 
-            if any(kw in output.lower() for kw in prediction_keywords) and "não constitui recomendação" not in output.lower():
+            if (
+                any(kw in output.lower() for kw in prediction_keywords)
+                and "não constitui recomendação" not in output.lower()
+            ):
                 output += disclaimer
 
         return output

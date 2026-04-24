@@ -91,3 +91,55 @@ class TestAgentEndpoint:
         )
         # Deve retornar 400 (bloqueado pelo guardrail) ou 503 (agente não disponível)
         assert response.status_code in [400, 503]
+
+
+class TestTrainEndpoint:
+    """Testes do endpoint de treinamento."""
+
+    def test_train_endpoint_returns_processing(self, client, monkeypatch):
+        """POST /train deve retornar 202 com status processing."""
+        monkeypatch.setattr(
+            "src.serving.app._run_training_task", lambda: None
+        )
+        response = client.post("/train")
+        assert response.status_code == 202
+        data = response.json()
+        assert data["status"] == "processing"
+        assert "message" in data
+
+
+class TestInferEndpoint:
+    """Testes do endpoint de inferência raw."""
+
+    @pytest.fixture(autouse=True)
+    def _setup_fake_predictor(self, monkeypatch):
+        """Configura fake predictor para testes de inferência."""
+
+        class FakePredictor:
+            sequence_length = 60
+            feature_columns = [f"f{i}" for i in range(14)]
+
+            def predict(self, data):
+                """Retorna predição fixa."""
+                assert data.shape == (60, 14)
+                return 0.123
+
+        monkeypatch.setattr("src.serving.app._predictor", FakePredictor())
+
+    def test_infer_endpoint_returns_prediction(self, client):
+        """POST /infer com payload válido deve retornar predição."""
+        payload = {"features": [[0.1] * 14 for _ in range(60)]}
+        response = client.post("/infer", json=payload)
+        assert response.status_code == 200
+        assert response.json()["predicted_scaled"] == 0.123
+
+    def test_infer_endpoint_missing_features_returns_422(self, client):
+        """POST /infer sem features deve retornar 422."""
+        response = client.post("/infer", json={})
+        assert response.status_code == 422
+
+    def test_infer_endpoint_invalid_shape_returns_422(self, client):
+        """POST /infer com shape incorreto deve retornar 422."""
+        payload = {"features": [[0.1] * 14 for _ in range(10)]}
+        response = client.post("/infer", json=payload)
+        assert response.status_code == 422

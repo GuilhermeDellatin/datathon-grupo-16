@@ -32,13 +32,9 @@ class StockPredictor:
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
         resolved_model_path = resolve_project_file(model_path)
 
-        if not resolved_model_path.exists():
-            raise FileNotFoundError(
-                f"Modelo não encontrado em '{resolved_model_path}'. "
-                "Execute `make train` para gerar o checkpoint."
-            )
-
-        checkpoint = torch.load(resolved_model_path, map_location=self.device, weights_only=False)
+        checkpoint = torch.load(
+            model_path, map_location=self.device, weights_only=False
+        )
 
         self.feature_columns = checkpoint["feature_columns"]
         self.sequence_length = checkpoint["sequence_length"]
@@ -81,7 +77,7 @@ class StockPredictor:
         x = torch.FloatTensor(input_data).unsqueeze(0).to(self.device)
         with torch.no_grad():
             pred = self.model(x).squeeze().item()
-        return pred
+        return float(pred)
 
     def predict_from_dataframe(self, df: pd.DataFrame) -> dict[str, float]:
         """Predição a partir de DataFrame com features.

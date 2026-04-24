@@ -34,6 +34,9 @@ Avalie nos seguintes critérios (nota de 1 a 5):
 5. **Disclaimers de Risco**: Quando aplicável, a resposta inclui avisos de que não é recomendação \
 de investimento?
 
+Cada "score" DEVE ser um inteiro entre 1 e 5 (inclusive). Não some os critérios.
+O "overall_score" também deve estar entre 1 e 5 e representar a média ponderada dos 5 critérios.
+
 Responda APENAS com JSON no formato:
 {{
   "technical_correctness": {{"score": N, "justification": "..."}},
@@ -44,6 +47,20 @@ Responda APENAS com JSON no formato:
   "overall_score": N,
   "overall_feedback": "..."
 }}"""
+
+
+def _clamp_score(value: float, lo: float = 1.0, hi: float = 5.0) -> float:
+    """Restringe um score à faixa [lo, hi].
+
+    Args:
+        value: Score bruto retornado pelo juiz.
+        lo: Limite inferior da escala.
+        hi: Limite superior da escala.
+
+    Returns:
+        Valor truncado ao intervalo válido.
+    """
+    return max(lo, min(hi, float(value)))
 
 
 def evaluate_with_llm_judge(
@@ -95,10 +112,24 @@ def evaluate_with_llm_judge(
             scores["query"] = item["query"]
             all_scores.append(scores)
 
+            item_criteria = [
+                _clamp_score(scores[c]["score"])
+                for c in (
+                    "technical_correctness",
+                    "relevance",
+                    "clarity",
+                    "investor_utility",
+                    "risk_disclaimers",
+                )
+                if c in scores and "score" in scores[c]
+            ]
+            derived_overall = (
+                sum(item_criteria) / len(item_criteria) if item_criteria else 0.0
+            )
             logger.info(
-                "Avaliado '%s': overall=%.1f",
+                "Avaliado '%s': overall=%.2f",
                 item["query"][:40],
-                scores.get("overall_score", 0),
+                derived_overall,
             )
 
         except Exception as e:
@@ -116,16 +147,26 @@ def evaluate_with_llm_judge(
     summary = {}
     for criterion in criteria:
         scores_list = [
-            s[criterion]["score"]
+            _clamp_score(s[criterion]["score"])
             for s in all_scores
             if criterion in s and "score" in s[criterion]
         ]
         if scores_list:
             summary[f"avg_{criterion}"] = sum(scores_list) / len(scores_list)
 
-    overall_scores = [s["overall_score"] for s in all_scores if "overall_score" in s]
-    if overall_scores:
-        summary["avg_overall"] = sum(overall_scores) / len(overall_scores)
+    # Overall é calculado determinísticamente como média dos 5 critérios por item,
+    # ignorando o overall_score autorelatado pelo juiz (que pode vir fora da escala).
+    per_item_overalls = []
+    for s in all_scores:
+        item_scores = [
+            _clamp_score(s[c]["score"])
+            for c in criteria
+            if c in s and "score" in s[c]
+        ]
+        if len(item_scores) == len(criteria):
+            per_item_overalls.append(sum(item_scores) / len(item_scores))
+    if per_item_overalls:
+        summary["avg_overall"] = sum(per_item_overalls) / len(per_item_overalls)
 
     summary["n_evaluated"] = len(all_scores)
 

@@ -3,6 +3,8 @@
 Endpoints:
 - POST /predict — Predição de preço via LSTM
 - POST /agent — Query ao agente ReAct
+- POST /train — Retreinamento em background
+- POST /infer — Inferência raw (machine-to-machine)
 - GET /health — Health check
 - GET /metrics — Métricas Prometheus
 """
@@ -11,8 +13,9 @@ import logging
 import time
 from contextlib import asynccontextmanager
 
+import numpy as np
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import BackgroundTasks, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
@@ -75,6 +78,28 @@ class HealthResponse(BaseModel):
     model_loaded: bool
     agent_ready: bool
     version: str
+
+
+class TrainResponse(BaseModel):
+    """Response do disparo de treinamento."""
+
+    message: str
+    status: str
+
+
+class InferRequest(BaseModel):
+    """Request de inferência raw com features já escaladas."""
+
+    features: list[list[float]] = Field(
+        ...,
+        description="Array 2D de features já escaladas (sequence_length, n_features)",
+    )
+
+
+class InferResponse(BaseModel):
+    """Response da inferência raw."""
+
+    predicted_scaled: float
 
 
 # --- App Lifecycle ---
@@ -245,6 +270,116 @@ async def agent_query(request: AgentRequest) -> AgentResponse:
         AGENT_REQUESTS.labels(status="error").inc()
         logger.error("Erro no agente: %s", e)
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+def _run_training_task() -> None:
+    """Executa o pipeline de treinamento em background.
+
+    Returns:
+        None.
+    """
+    global _predictor
+
+    logger.info("Iniciando pipeline de treinamento em background")
+    try:
+        from src.models.train import train_and_log
+
+        run_id = train_and_log()
+        logger.info("Treinamento concluído com run_id=%s", run_id)
+
+        try:
+            from src.models.predict import StockPredictor
+
+            new_predictor = StockPredictor()
+            _predictor = new_predictor
+            logger.info("Modelo recarregado com sucesso após treinamento")
+        except Exception:
+            logger.error(
+                "Falha ao recarregar modelo após treinamento", exc_info=True
+            )
+    except Exception:
+        logger.error("Falha no pipeline de treinamento", exc_info=True)
+
+
+@app.post(
+    "/train",
+    response_model=TrainResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def trigger_training(
+    background_tasks: BackgroundTasks,
+) -> TrainResponse:
+    """Dispara o pipeline de treinamento em background.
+
+    Args:
+        background_tasks: Gerenciador de tasks em background do FastAPI.
+
+    Returns:
+        Status inicial do processamento.
+    """
+    background_tasks.add_task(_run_training_task)
+    return TrainResponse(
+        message="Pipeline de treinamento iniciado em background.",
+        status="processing",
+    )
+
+
+@app.post("/infer", response_model=InferResponse)
+async def infer_raw(request: InferRequest) -> InferResponse:
+    """Executa inferência raw com features já escaladas.
+
+    Args:
+        request: Payload com matriz 2D de features escaladas.
+
+    Returns:
+        Valor predito na escala do modelo.
+
+    Raises:
+        HTTPException: Quando o modelo não está carregado, o payload tem shape
+            inválido ou a inferência falha.
+    """
+    start_time = time.time()
+    try:
+        if _predictor is None:
+            PREDICTION_REQUESTS.labels(ticker="RAW", status="error").inc()
+            raise HTTPException(
+                status_code=503, detail="Modelo não carregado"
+            )
+
+        data = np.array(request.features, dtype=np.float32)
+
+        expected_shape = (
+            _predictor.sequence_length,
+            len(_predictor.feature_columns),
+        )
+        if (
+            data.ndim != 2
+            or data.shape[0] != expected_shape[0]
+            or data.shape[1] != expected_shape[1]
+            or not np.isfinite(data).all()
+        ):
+            PREDICTION_REQUESTS.labels(ticker="RAW", status="error").inc()
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"Shape inválido: esperado {expected_shape}, "
+                    f"recebido {data.shape}"
+                ),
+            )
+
+        prediction = _predictor.predict(data)
+
+        PREDICTION_REQUESTS.labels(ticker="RAW", status="success").inc()
+        return InferResponse(predicted_scaled=float(prediction))
+
+    except HTTPException:
+        raise
+    except Exception as exc:
+        PREDICTION_REQUESTS.labels(ticker="RAW", status="error").inc()
+        logger.error("Erro na inferência raw: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+    finally:
+        PREDICTION_LATENCY.observe(time.time() - start_time)
 
 
 @app.get("/metrics")

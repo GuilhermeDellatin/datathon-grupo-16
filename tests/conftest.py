@@ -60,8 +60,10 @@ def sample_sequences(sample_features_data: pd.DataFrame):
     scaler = MinMaxScaler()
     data_scaled = scaler.fit_transform(data)
 
-    x, y = create_sequences(data_scaled, sequence_length=30, prediction_horizon=1, target_idx=0)
-    return x, y, scaler
+    X, y = create_sequences(
+        data_scaled, sequence_length=30, prediction_horizon=1, target_idx=0
+    )
+    return X, y, scaler
 
 
 @pytest.fixture

@@ -15,8 +15,6 @@ import ta
 import yaml
 from pandera import Check, Column, DataFrameSchema
 
-from src.paths import resolve_project_file
-
 logger = logging.getLogger(__name__)
 
 
@@ -62,9 +60,9 @@ def load_config(config_path: str = "configs/model_config.yaml") -> dict:
     Returns:
         Dicionário com configurações.
     """
-    config_file = resolve_project_file(config_path)
-    with open(config_file) as f:
-        return yaml.safe_load(f)
+    with open(config_path) as f:
+        config: dict = yaml.safe_load(f)
+    return config
 
 
 def validate_raw_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -169,13 +167,14 @@ def create_sequences(
         Tupla (x_data, y_data) onde x_data.shape = (n_samples, sequence_length, n_features)
         e y_data.shape = (n_samples,).
     """
-    x_data, y_data = [], []
+    X_list: list = []
+    y_list: list = []
     for i in range(sequence_length, len(data) - prediction_horizon + 1):
-        x_data.append(data[i - sequence_length : i])
-        y_data.append(data[i + prediction_horizon - 1, target_idx])
+        X_list.append(data[i - sequence_length : i])
+        y_list.append(data[i + prediction_horizon - 1, target_idx])
 
-    x_data = np.array(x_data, dtype=np.float32)
-    y_data = np.array(y_data, dtype=np.float32)
+    X = np.array(X_list, dtype=np.float32)
+    y = np.array(y_list, dtype=np.float32)
 
     logger.info(
         "Sequências criadas: X=%s, y=%s (seq_len=%d, horizon=%d)",
@@ -227,9 +226,8 @@ def main() -> None:
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     )
 
-    load_config()
-    raw_path = resolve_project_file("data/raw/petr4_raw.parquet")
-    output_path = resolve_project_file("data/processed/petr4_features.parquet")
+    raw_path = "data/raw/petr4_raw.parquet"
+    output_path = "data/processed/petr4_features.parquet"
 
     df = pd.read_parquet(raw_path)
     df_features = compute_features(df)

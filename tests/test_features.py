@@ -74,17 +74,15 @@ class TestCreateSequences:
     def test_output_shapes(self):
         """X e y devem ter shapes corretos."""
         data = np.random.randn(100, 5).astype(np.float32)
-        x_data, y = create_sequences(data, sequence_length=10, prediction_horizon=1)
-
-        assert x_data.shape == (90, 10, 5)
+        X, y = create_sequences(data, sequence_length=10, prediction_horizon=1)
+        assert X.shape == (90, 10, 5)
         assert y.shape == (90,)
 
     def test_sequence_length_respected(self):
         """Cada sequência deve ter o tamanho correto."""
         data = np.random.randn(50, 3).astype(np.float32)
-        x_data, _ = create_sequences(data, sequence_length=20)
-
-        assert x_data.shape[1] == 20
+        X, _ = create_sequences(data, sequence_length=20)
+        assert X.shape[1] == 20
 
     def test_prediction_horizon(self):
         """Target deve corresponder ao horizonte correto."""
