@@ -75,7 +75,9 @@ class TestSearchFinancialDocs:
         """Deve tratar exceção na busca."""
         from src.agent.tools import _search_financial_docs
 
-        with patch("src.agent.tools.RAGPipeline", side_effect=Exception("Index error"), create=True):
+        with patch(
+            "src.agent.tools.RAGPipeline", side_effect=Exception("Index error"), create=True
+        ):
             # The function has its own import, hard to mock
             # Just verify it doesn't crash with real index
             result = _search_financial_docs("teste")

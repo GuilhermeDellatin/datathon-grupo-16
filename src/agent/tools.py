@@ -145,9 +145,7 @@ def _fetch_market_data(query: str) -> str:
         result += f"- Volume médio (20d): {avg_volume:,.0f}\n"
 
         # Variação no mês
-        month_change = (
-            (latest["Close"] - hist["Close"].iloc[0]) / hist["Close"].iloc[0]
-        ) * 100
+        month_change = ((latest["Close"] - hist["Close"].iloc[0]) / hist["Close"].iloc[0]) * 100
         result += f"- Variação no mês: {month_change:+.2f}%"
 
         return result

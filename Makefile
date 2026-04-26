@@ -21,6 +21,8 @@ data: ## Coleta e processa dados via DVC
 	dvc repro
 
 train: ## Treina modelo LSTM
+	python -m src.data.collector
+	python -m src.data.feature_engineering
 	python -m src.models.train
 
 serve: ## Sobe API local

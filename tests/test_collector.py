@@ -54,9 +54,7 @@ class TestCollectStockData:
     @patch("src.data.collector.yf.download")
     def test_handles_multi_index(self, mock_download, mock_yf_data):
         """Deve lidar com MultiIndex columns do yfinance."""
-        multi_idx = pd.MultiIndex.from_tuples(
-            [(c, "PETR4.SA") for c in mock_yf_data.columns]
-        )
+        multi_idx = pd.MultiIndex.from_tuples([(c, "PETR4.SA") for c in mock_yf_data.columns])
         multi_df = mock_yf_data.copy()
         multi_df.columns = multi_idx
         mock_download.return_value = multi_df

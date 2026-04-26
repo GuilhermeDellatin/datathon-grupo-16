@@ -5,12 +5,14 @@ Isolado do pipeline de treinamento (sem acoplamento).
 """
 
 import logging
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import torch
 
 from src.models.lstm_model import LSTMPredictor
+from src.paths import resolve_project_file
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +31,14 @@ class StockPredictor:
         device: str | None = None,
     ):
         self.device = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
+        resolved_model_path = resolve_project_file(model_path)
 
-        checkpoint = torch.load(
-            model_path, map_location=self.device, weights_only=False
-        )
+        if not Path(resolved_model_path).exists():
+            raise FileNotFoundError(
+                f"Modelo nao encontrado em '{resolved_model_path}'. Execute 'make train' para treinar e gerar o checkpoint."
+            )
+
+        checkpoint = torch.load(resolved_model_path, map_location=self.device, weights_only=False)
 
         self.feature_columns = checkpoint["feature_columns"]
         self.sequence_length = checkpoint["sequence_length"]
@@ -61,7 +67,7 @@ class StockPredictor:
         self.scaler.data_max_ = np.array(checkpoint["scaler_params"]["data_max_"])
         self.scaler.n_features_in_ = len(self.feature_columns)
 
-        logger.info("Modelo carregado de %s (device=%s)", model_path, self.device)
+        logger.info("Modelo carregado de %s (device=%s)", resolved_model_path, self.device)
 
     def predict(self, input_data: np.ndarray) -> float:
         """Realiza predição a partir de dados já escalados.

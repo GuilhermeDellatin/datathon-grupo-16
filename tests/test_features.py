@@ -51,9 +51,18 @@ class TestComputeFeatures:
         """Todas as features técnicas devem estar presentes."""
         result = compute_features(sample_ohlcv_data)
         expected = [
-            "sma_20", "sma_50", "ema_12", "ema_26", "rsi_14",
-            "macd", "macd_signal", "bollinger_upper", "bollinger_lower",
-            "volume_sma_20", "daily_return", "log_return",
+            "sma_20",
+            "sma_50",
+            "ema_12",
+            "ema_26",
+            "rsi_14",
+            "macd",
+            "macd_signal",
+            "bollinger_upper",
+            "bollinger_lower",
+            "volume_sma_20",
+            "daily_return",
+            "log_return",
         ]
         for col in expected:
             assert col in result.columns, f"Feature {col} ausente"
@@ -86,15 +95,15 @@ class TestCreateSequences:
     def test_empty_data(self):
         """Dados muito curtos devem retornar arrays vazios."""
         data = np.random.randn(5, 3).astype(np.float32)
-        X, y = create_sequences(data, sequence_length=10)
-        assert len(X) == 0
+        x_data, y = create_sequences(data, sequence_length=10)
+        assert len(x_data) == 0
         assert len(y) == 0
 
     def test_dtype_float32(self):
         """Saída deve ser float32."""
         data = np.random.randn(50, 3).astype(np.float32)
-        X, y = create_sequences(data, sequence_length=10)
-        assert X.dtype == np.float32
+        x_data, y = create_sequences(data, sequence_length=10)
+        assert x_data.dtype == np.float32
         assert y.dtype == np.float32
 
 
@@ -103,9 +112,9 @@ class TestSplitData:
 
     def test_no_data_leakage(self):
         """Split temporal: treino antes de val, val antes de test."""
-        X = np.arange(100).reshape(100, 1, 1).astype(np.float32)
+        x_data = np.arange(100).reshape(100, 1, 1).astype(np.float32)
         y = np.arange(100).astype(np.float32)
-        splits = split_data(X, y, train_ratio=0.7, val_ratio=0.15)
+        splits = split_data(x_data, y, train_ratio=0.7, val_ratio=0.15)
 
         train_max = splits["train"][1].max()
         val_min = splits["val"][1].min()
@@ -117,18 +126,18 @@ class TestSplitData:
 
     def test_all_data_used(self):
         """Todos os dados devem ser distribuídos nos splits."""
-        X = np.random.randn(100, 1, 1).astype(np.float32)
+        x_data = np.random.randn(100, 1, 1).astype(np.float32)
         y = np.random.randn(100).astype(np.float32)
-        splits = split_data(X, y)
+        splits = split_data(x_data, y)
 
         total = sum(len(s[0]) for s in splits.values())
         assert total == 100
 
     def test_split_ratios(self):
         """Splits devem respeitar proporções aproximadas."""
-        X = np.random.randn(1000, 1, 1).astype(np.float32)
+        x_data = np.random.randn(1000, 1, 1).astype(np.float32)
         y = np.random.randn(1000).astype(np.float32)
-        splits = split_data(X, y, train_ratio=0.8, val_ratio=0.1)
+        splits = split_data(x_data, y, train_ratio=0.8, val_ratio=0.1)
 
         assert len(splits["train"][0]) == 800
         assert len(splits["val"][0]) == 100

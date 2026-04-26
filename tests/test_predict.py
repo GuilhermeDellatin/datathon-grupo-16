@@ -57,6 +57,13 @@ class TestStockPredictor:
         assert predictor.sequence_length == 10
         assert predictor.prediction_horizon == 5
 
+    def test_missing_model_has_clear_error(self, tmp_path):
+        """Arquivo ausente deve gerar erro orientando a treinar o modelo."""
+        missing_model = tmp_path / "missing_model.pt"
+
+        with pytest.raises(FileNotFoundError, match="make train"):
+            StockPredictor(model_path=str(missing_model))
+
     def test_predict_returns_float(self, mock_checkpoint):
         """predict deve retornar float."""
         predictor = StockPredictor(model_path=mock_checkpoint)
@@ -86,9 +93,7 @@ class TestStockPredictor:
         """DataFrame muito curto deve levantar ValueError."""
         predictor = StockPredictor(model_path=mock_checkpoint)
 
-        df = pd.DataFrame(
-            {"Close": [30.0], "Volume": [1e6], "sma_20": [29.5]}
-        )
+        df = pd.DataFrame({"Close": [30.0], "Volume": [1e6], "sma_20": [29.5]})
 
         with pytest.raises(ValueError, match="pelo menos"):
             predictor.predict_from_dataframe(df)
