@@ -34,14 +34,31 @@ MIN_DATA_QUALITY = 0.85
 # ==================== Helpers ====================
 
 
+def ensure_project_on_path():
+    """Prioriza o código montado no runtime do Airflow para imports diretos."""
+    raw_candidates = [
+        PROJECT_ROOT,
+        os.environ.get("AIRFLOW_HOME", "/opt/airflow"),
+        os.getcwd(),
+    ]
+    candidates = []
+    for candidate in raw_candidates:
+        if candidate and candidate not in candidates:
+            candidates.append(candidate)
+
+    for candidate in candidates:
+        if candidate and os.path.isdir(os.path.join(candidate, "src")) and candidate in sys.path:
+            sys.path.remove(candidate)
+
+    for candidate in candidates:
+        if candidate and os.path.isdir(os.path.join(candidate, "src")):
+            sys.path.insert(0, candidate)
+
+
 def run_module(module_name: str):
     """Executa módulo python como subprocess leve."""
     logger.info(f"Executando módulo: {module_name}")
-    subprocess.run(
-        [sys.executable, "-m", module_name],
-        check=True,
-        cwd="/opt/airflow"
-    )  # nosec B603
+    subprocess.run([sys.executable, "-m", module_name], check=True, cwd="/opt/airflow")  # nosec B603
 
 
 # ==================== Tasks ====================
@@ -56,7 +73,13 @@ def feature_engineering():
 
 
 def train_model():
-    run_module("src.models.train")
+    ensure_project_on_path()
+
+    from src.models.train import train_and_log
+
+    run_id = train_and_log()
+    logger.info("Treinamento concluído. Run ID: %s", run_id)
+    return run_id
 
 
 def evaluate_quality():
@@ -68,8 +91,30 @@ def evaluate_quality():
     run_module("evaluation.ragas_eval")
 
 
-def register_model():
-    run_module("src.monitoring.model_registry")
+def register_model(**context):
+    ensure_project_on_path()
+
+    from src.monitoring.model_registry import register_model_run
+
+    ti = context["task_instance"]
+    run_id = ti.xcom_pull(task_ids="train_model")
+
+    if not run_id:
+        raise AirflowException("run_id não encontrado no XCom da task train_model")
+
+    registered_model_info = register_model_run(
+        run_id=run_id,
+        model_name=MLFLOW_MODEL_NAME,
+        tracking_uri=MLFLOW_TRACKING_URI,
+    )
+
+    logger.info(
+        "Modelo registrado no MLflow: %s v%s",
+        registered_model_info["name"],
+        registered_model_info["version"],
+    )
+    ti.xcom_push(key="registered_model", value=registered_model_info)
+    return registered_model_info
 
 
 # ==================== Validation logic ====================
@@ -123,6 +168,8 @@ def generate_report(**context):
 
     report = {
         "run_date": datetime.now().isoformat(),
+        "training_run_id": ti.xcom_pull(task_ids="train_model"),
+        "registered_model": ti.xcom_pull(task_ids="register_model"),
         "data_quality": ti.xcom_pull(task_ids="validate_data"),
         "drift": ti.xcom_pull(task_ids="drift_detection"),
         "metrics": ti.xcom_pull(task_ids="validate_model"),

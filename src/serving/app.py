@@ -38,9 +38,7 @@ class PredictionRequest(BaseModel):
     """Request para predição de preço."""
 
     ticker: str = Field(default="PETR4.SA", description="Símbolo da ação")
-    horizon_days: int = Field(
-        default=5, ge=1, le=30, description="Horizonte de predição em dias"
-    )
+    horizon_days: int = Field(default=5, ge=1, le=30, description="Horizonte de predição em dias")
 
 
 class PredictionResponse(BaseModel):
@@ -144,9 +142,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Datathon LSTM Stock Predictor",
-    description=(
-        "API para predição de preços de ações (PETR4.SA) com LSTM e agente ReAct"
-    ),
+    description=("API para predição de preços de ações (PETR4.SA) com LSTM e agente ReAct"),
     version="0.1.0",
     lifespan=lifespan,
 )
@@ -195,9 +191,7 @@ async def predict(request: PredictionRequest) -> PredictionResponse:
             df.columns = df.columns.get_level_values(0)
 
         if df.empty:
-            raise HTTPException(
-                status_code=404, detail=f"Sem dados para {request.ticker}"
-            )
+            raise HTTPException(status_code=404, detail=f"Sem dados para {request.ticker}")
 
         df_features = compute_features(df)
         result = _predictor.predict_from_dataframe(df_features)
@@ -288,15 +282,28 @@ def _run_training_task() -> None:
         logger.info("Treinamento concluído com run_id=%s", run_id)
 
         try:
+            from src.monitoring.model_registry import register_model_run
+
+            registered_model = register_model_run(run_id)
+            logger.info(
+                "Modelo registrado no MLflow Registry: %s v%s",
+                registered_model["name"],
+                registered_model["version"],
+            )
+        except Exception:
+            logger.error(
+                "Falha ao registrar modelo no MLflow Registry após treinamento",
+                exc_info=True,
+            )
+
+        try:
             from src.models.predict import StockPredictor
 
             new_predictor = StockPredictor()
             _predictor = new_predictor
             logger.info("Modelo recarregado com sucesso após treinamento")
         except Exception:
-            logger.error(
-                "Falha ao recarregar modelo após treinamento", exc_info=True
-            )
+            logger.error("Falha ao recarregar modelo após treinamento", exc_info=True)
     except Exception:
         logger.error("Falha no pipeline de treinamento", exc_info=True)
 
@@ -342,9 +349,7 @@ async def infer_raw(request: InferRequest) -> InferResponse:
     try:
         if _predictor is None:
             PREDICTION_REQUESTS.labels(ticker="RAW", status="error").inc()
-            raise HTTPException(
-                status_code=503, detail="Modelo não carregado"
-            )
+            raise HTTPException(status_code=503, detail="Modelo não carregado")
 
         data = np.array(request.features, dtype=np.float32)
 
@@ -361,10 +366,7 @@ async def infer_raw(request: InferRequest) -> InferResponse:
             PREDICTION_REQUESTS.labels(ticker="RAW", status="error").inc()
             raise HTTPException(
                 status_code=422,
-                detail=(
-                    f"Shape inválido: esperado {expected_shape}, "
-                    f"recebido {data.shape}"
-                ),
+                detail=(f"Shape inválido: esperado {expected_shape}, " f"recebido {data.shape}"),
             )
 
         prediction = _predictor.predict(data)

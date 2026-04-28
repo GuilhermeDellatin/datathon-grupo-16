@@ -3,7 +3,7 @@
 Implementa:
 - Treino com early stopping e gradient clipping
 - MLflow tracking: params, metrics, artifacts, tags obrigatórias
-- Model Registry: registro automático com metadata
+- Log do modelo para registro posterior via orquestrador
 - Champion-challenger: comparação antes de promover modelo
 """
 
@@ -238,9 +238,7 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
     train_ds = TensorDataset(
         torch.FloatTensor(splits["train"][0]), torch.FloatTensor(splits["train"][1])
     )
-    val_ds = TensorDataset(
-        torch.FloatTensor(splits["val"][0]), torch.FloatTensor(splits["val"][1])
-    )
+    val_ds = TensorDataset(torch.FloatTensor(splits["val"][0]), torch.FloatTensor(splits["val"][1]))
     test_ds = TensorDataset(
         torch.FloatTensor(splits["test"][0]), torch.FloatTensor(splits["test"][1])
     )
@@ -418,11 +416,6 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
         scaler_path = "models/scaler.joblib"
         joblib.dump(scaler, scaler_path)
         mlflow.log_artifact(scaler_path)
-
-        # Registrar no Model Registry
-        model_uri = f"runs:/{run.info.run_id}/model"
-        mv = mlflow.register_model(model_uri, config["mlflow"]["model_name"])
-        logger.info("Modelo registrado: %s v%s", mv.name, mv.version)
 
         return str(run.info.run_id)
 

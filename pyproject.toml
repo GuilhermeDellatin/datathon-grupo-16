@@ -112,7 +112,7 @@ exclude_dirs = ["tests"]
 # B404/B603/B607: subprocess com args hardcoded para ler `git rev-parse HEAD` local — sem input do usuário.
 # B614: torch.load com weights_only=False é obrigatório (checkpoint contém scaler_params/feature_columns);
 # só carregamos modelos gerados pelo próprio pipeline.
-skips = ["B101", "B404", "B603", "B607", "B614"]
+skips = ["B101", "B404", "B603", "B607"]
 
 [tool.coverage.run]
 source = ["src"]
