@@ -63,3 +63,32 @@ class TestRAGPipeline:
         rag = RAGPipeline()
         results = rag.retrieve_with_scores("Preço do petróleo", top_k=2)
         assert isinstance(results, list)
+
+    def test_pipeline_builds_index_from_clean_state(self, tmp_path):
+        """Simula o passo do Dockerfile que gera `data/rag_index/` do zero.
+
+        Garante que um build limpo (sem índice pré-existente no host) é
+        capaz de criar o índice FAISS a partir dos documentos commitados.
+        """
+        from src.agent.rag_pipeline import RAGPipeline
+
+        docs_dir = tmp_path / "rag_documents"
+        docs_dir.mkdir()
+        (docs_dir / "doc1.md").write_text(
+            "# Petrobras\nA Petrobras é uma estatal brasileira de petróleo."
+        )
+        (docs_dir / "doc2.md").write_text(
+            "# Glossário\nDividendos são distribuições de lucro aos acionistas."
+        )
+
+        index_path = tmp_path / "rag_index"
+        # Deliberadamente não criar `index_path` — o pipeline deve construir.
+        assert not index_path.exists()
+
+        rag = RAGPipeline(docs_dir=str(docs_dir), index_path=str(index_path))
+
+        assert (index_path / "index.faiss").exists()
+        assert (index_path / "index.pkl").exists()
+
+        results = rag.retrieve("dividendos", top_k=1)
+        assert len(results) == 1

@@ -52,3 +52,14 @@ mlflow:
     phase: "datathon-fase05"
     risk_level: "medium"
     ticker: "PETR4.SA"
+
+baseline:
+  ridge:
+    alpha: 1.0
+  mlp:
+    hidden_sizes: [128, 64]
+    dropout: 0.1
+    epochs: 50
+    learning_rate: 0.001
+    batch_size: 32
+    weight_decay: 0.0001

@@ -7,11 +7,13 @@ Implementa:
 - Champion-challenger: comparação antes de promover modelo
 """
 
+import copy
 import hashlib
 import json
 import logging
 import subprocess
 from pathlib import Path
+from typing import Any
 
 import joblib
 import mlflow
@@ -50,6 +52,37 @@ def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, float]:
     mape = float(np.mean(np.abs((y_true[mask] - y_pred[mask]) / y_true[mask])) * 100)
 
     return {"mae": mae, "rmse": rmse, "mape": mape}
+
+
+def compute_sigma_coverage(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    threshold_sigma: float = 0.5,
+) -> dict[str, float]:
+    """Calcula a métrica de negócio de cobertura por desvios-padrão.
+
+    Métrica do Datathon: percentual de predições com erro absoluto
+    <= threshold_sigma * sigma(y_true). Os arrays devem estar na mesma
+    escala (preferencialmente preço original em R$) para que o sigma
+    represente a volatilidade real do ativo.
+
+    Args:
+        y_true: Valores reais.
+        y_pred: Valores preditos.
+        threshold_sigma: Tolerância em desvios-padrão (default 0.5).
+
+    Returns:
+        Dicionário com sigma observado, threshold absoluto e coverage [0, 1].
+    """
+    sigma = float(np.std(y_true, ddof=0))
+    threshold = threshold_sigma * sigma
+    errors = np.abs(y_pred - y_true)
+    coverage = float(np.mean(errors <= threshold))
+    return {
+        "target_sigma": sigma,
+        "sigma_threshold": threshold,
+        "sigma_coverage": coverage,
+    }
 
 
 # --- Early Stopping ---
@@ -185,16 +218,51 @@ def evaluate_epoch(
 # --- Main Training Pipeline ---
 
 
-def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
+def _deep_merge(base: dict[str, Any], overrides: dict[str, Any]) -> dict[str, Any]:
+    """Mescla recursivamente `overrides` em `base` sem mutar a entrada.
+
+    Valores em `overrides` prevalecem; sub-dicionários são mesclados
+    recursivamente; outros tipos são substituídos.
+
+    Args:
+        base: Dicionário base (ex.: config carregado do YAML).
+        overrides: Sobrescritas a aplicar.
+
+    Returns:
+        Novo dicionário mesclado.
+    """
+    result = copy.deepcopy(base)
+    for key, value in overrides.items():
+        if (
+            key in result
+            and isinstance(result[key], dict)
+            and isinstance(value, dict)
+        ):
+            result[key] = _deep_merge(result[key], value)
+        else:
+            result[key] = value
+    return result
+
+
+def train_and_log(
+    config_path: str = "configs/model_config.yaml",
+    overrides: dict[str, Any] | None = None,
+) -> str:
     """Pipeline completa de treinamento com MLflow tracking.
 
     Args:
         config_path: Caminho da configuração YAML.
+        overrides: Dict com sobrescritas opcionais aplicadas após carregar o
+            YAML (ex.: ``{"training": {"epochs": 10}}``). Útil para retreinos
+            disparados via API com hiperparâmetros customizados.
 
     Returns:
         run_id do MLflow.
     """
     config = load_config(config_path)
+    if overrides:
+        config = _deep_merge(config, overrides)
+        logger.info("Config sobrescrito com overrides: %s", list(overrides.keys()))
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info("Device: %s", device)
 
@@ -374,6 +442,26 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
 
         metrics = compute_metrics(y_true, y_pred)
         metrics["best_val_loss"] = best_val_loss
+
+        # Métrica de negócio (Datathon): cobertura dentro de 0.5 sigma em
+        # escala original de preço (R$). target_idx=0 == coluna Close.
+        close_min = float(scaler.data_min_[0])
+        close_max = float(scaler.data_max_[0])
+        close_range = close_max - close_min
+        y_true_price = y_true * close_range + close_min
+        y_pred_price = y_pred * close_range + close_min
+
+        sigma_metrics = compute_sigma_coverage(
+            y_true_price, y_pred_price, threshold_sigma=0.5
+        )
+        metrics["target_sigma"] = sigma_metrics["target_sigma"]
+        metrics["sigma_threshold_0_5"] = sigma_metrics["sigma_threshold"]
+        metrics["sigma_coverage_0_5"] = sigma_metrics["sigma_coverage"]
+
+        gate_target = 0.70
+        sigma_gate_passed = sigma_metrics["sigma_coverage"] >= gate_target
+        mlflow.set_tag("sigma_gate_70pct_passed", str(sigma_gate_passed).lower())
+
         mlflow.log_metrics(metrics)
 
         logger.info(
@@ -381,6 +469,15 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
             metrics["mae"],
             metrics["rmse"],
             metrics["mape"],
+        )
+        logger.info(
+            "Métrica de negócio: sigma=%.4f, threshold(0.5σ)=%.4f, "
+            "coverage=%.2f%% (gate %s, alvo %.0f%%)",
+            sigma_metrics["target_sigma"],
+            sigma_metrics["sigma_threshold"],
+            sigma_metrics["sigma_coverage"] * 100,
+            "PASSOU" if sigma_gate_passed else "FALHOU",
+            gate_target * 100,
         )
 
         # --- Salvar artefatos ---
