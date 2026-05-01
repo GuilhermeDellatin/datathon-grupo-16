@@ -77,6 +77,14 @@ dev = [
     "matplotlib>=3.8.0",
     "seaborn>=0.13.0",
 ]
+# Subset minimal para CI/test runners (não inclui pre-commit, ipykernel, etc.).
+# Usado pelo comando do README: `pip install -e ".[dev,test]"`.
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.26.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["."]
