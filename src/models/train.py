@@ -54,6 +54,81 @@ def compute_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, float]:
     return {"mae": mae, "rmse": rmse, "mape": mape}
 
 
+def compute_fairness_by_volatility(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    n_quantiles: int = 3,
+    fairness_tolerance: float = 0.10,
+) -> dict[str, float]:
+    """Avalia fairness do modelo entre regimes de volatilidade.
+
+    Divide o teste em ``n_quantiles`` faixas pela volatilidade local da
+    série real (calculada em janela móvel) e compara o ``sigma_coverage_0_5``
+    em cada faixa contra a média global. O modelo é considerado "fair"
+    quando o gap entre o melhor e o pior regime fica abaixo de
+    ``fairness_tolerance``.
+
+    Slice declarado: regime de volatilidade (proxy para "condições de
+    mercado calmas vs voláteis"). É a única dimensão de fairness aplicável
+    a um modelo single-asset; quando passarmos para multi-ticker, faixas
+    por ativo serão adicionadas.
+
+    Args:
+        y_true: Valores reais em escala original (R$).
+        y_pred: Predições em escala original.
+        n_quantiles: Número de faixas (3 = baixa/média/alta).
+        fairness_tolerance: Gap máximo aceitável (0.10 = 10 p.p.).
+
+    Returns:
+        Dict com ``coverage_by_regime``, ``gap`` e flag ``fairness_ok``.
+    """
+    n = len(y_true)
+    if n < n_quantiles * 5:
+        return {
+            "coverage_by_regime": {},
+            "gap": float("nan"),
+            "fairness_ok": False,
+            "reason": "amostra_insuficiente",
+        }
+
+    # Volatilidade local: rolling std de retornos absolutos
+    returns = np.abs(np.diff(y_true, prepend=y_true[0]))
+    window = max(5, n // (n_quantiles * 4))
+    rolling = pd.Series(returns).rolling(window=window, min_periods=1).mean().values
+
+    quantile_edges = np.quantile(rolling, np.linspace(0, 1, n_quantiles + 1))
+    sigma_global = float(np.std(y_true, ddof=0))
+    threshold = 0.5 * sigma_global
+    errors = np.abs(y_pred - y_true)
+
+    coverage_by_regime: dict[str, float] = {}
+    for i in range(n_quantiles):
+        lo, hi = quantile_edges[i], quantile_edges[i + 1]
+        if i == n_quantiles - 1:
+            mask = (rolling >= lo) & (rolling <= hi)
+        else:
+            mask = (rolling >= lo) & (rolling < hi)
+        if not mask.any():
+            continue
+        coverage_by_regime[f"q{i + 1}"] = float(np.mean(errors[mask] <= threshold))
+
+    if not coverage_by_regime:
+        return {
+            "coverage_by_regime": {},
+            "gap": float("nan"),
+            "fairness_ok": False,
+            "reason": "sem_amostras_em_quantil",
+        }
+
+    values = list(coverage_by_regime.values())
+    gap = float(max(values) - min(values))
+    return {
+        "coverage_by_regime": coverage_by_regime,
+        "gap": gap,
+        "fairness_ok": gap <= fairness_tolerance,
+    }
+
+
 def compute_sigma_coverage(
     y_true: np.ndarray,
     y_pred: np.ndarray,
@@ -352,7 +427,9 @@ def train_and_log(
             tags["training_data_version"] = hashlib.md5(
                 _features_file.read(4096), usedforsecurity=False
             ).hexdigest()[:8]
-        tags["fairness_checked"] = "false"
+        # `fairness_checked` é setado de verdade após avaliação por regime de
+        # volatilidade no test set (ver compute_fairness_by_volatility).
+        tags["fairness_checked"] = "pending"
         for k, v in tags.items():
             mlflow.set_tag(k, str(v))
 
@@ -443,14 +520,21 @@ def train_and_log(
         metrics = compute_metrics(y_true, y_pred)
         metrics["best_val_loss"] = best_val_loss
 
-        # Métrica de negócio (Datathon): cobertura dentro de 0.5 sigma em
-        # escala original de preço (R$). target_idx=0 == coluna Close.
+        # --- Métricas em escala original de preço (R$) ---
+        # target_idx=0 == coluna Close. Reverter o MinMaxScaler apenas dessa
+        # coluna usando data_min_/data_max_ correspondentes.
         close_min = float(scaler.data_min_[0])
         close_max = float(scaler.data_max_[0])
         close_range = close_max - close_min
         y_true_price = y_true * close_range + close_min
         y_pred_price = y_pred * close_range + close_min
 
+        price_metrics = compute_metrics(y_true_price, y_pred_price)
+        metrics["mae_price"] = price_metrics["mae"]
+        metrics["rmse_price"] = price_metrics["rmse"]
+        metrics["mape_price"] = price_metrics["mape"]
+
+        # Métrica de negócio (Datathon): cobertura dentro de 0.5 sigma.
         sigma_metrics = compute_sigma_coverage(
             y_true_price, y_pred_price, threshold_sigma=0.5
         )
@@ -462,13 +546,34 @@ def train_and_log(
         sigma_gate_passed = sigma_metrics["sigma_coverage"] >= gate_target
         mlflow.set_tag("sigma_gate_70pct_passed", str(sigma_gate_passed).lower())
 
+        # --- Fairness por regime de volatilidade ---
+        fairness = compute_fairness_by_volatility(
+            y_true_price, y_pred_price, n_quantiles=3, fairness_tolerance=0.10
+        )
+        for regime, cov in fairness.get("coverage_by_regime", {}).items():
+            metrics[f"sigma_coverage_0_5_{regime}"] = cov
+        if not np.isnan(fairness.get("gap", float("nan"))):
+            metrics["fairness_gap"] = fairness["gap"]
+        mlflow.set_tag("fairness_checked", str(fairness.get("fairness_ok", False)).lower())
+        mlflow.set_tag(
+            "fairness_method", "volatility_quantiles_3_tolerance_0.10"
+        )
+        if "reason" in fairness:
+            mlflow.set_tag("fairness_skip_reason", str(fairness["reason"]))
+
         mlflow.log_metrics(metrics)
 
         logger.info(
-            "Test metrics: MAE=%.6f, RMSE=%.6f, MAPE=%.2f%%",
+            "Test metrics (norm): MAE=%.6f, RMSE=%.6f, MAPE=%.2f%%",
             metrics["mae"],
             metrics["rmse"],
             metrics["mape"],
+        )
+        logger.info(
+            "Test metrics (R$): MAE=%.4f, RMSE=%.4f, MAPE=%.2f%%",
+            metrics["mae_price"],
+            metrics["rmse_price"],
+            metrics["mape_price"],
         )
         logger.info(
             "Métrica de negócio: sigma=%.4f, threshold(0.5σ)=%.4f, "
@@ -507,8 +612,8 @@ def train_and_log(
         # Métricas em JSON
         metrics_path = "metrics/train_metrics.json"
         Path(metrics_path).parent.mkdir(parents=True, exist_ok=True)
-        with open(metrics_path, "w") as f:
-            json.dump(metrics, f, indent=2)
+        with open(metrics_path, "w", encoding="utf-8") as f:
+            json.dump(metrics, f, indent=2, ensure_ascii=False)
         mlflow.log_artifact(metrics_path)
 
         # Scaler
@@ -520,6 +625,62 @@ def train_and_log(
         model_uri = f"runs:/{run.info.run_id}/model"
         mv = mlflow.register_model(model_uri, config["mlflow"]["model_name"])
         logger.info("Modelo registrado: %s v%s", mv.name, mv.version)
+
+        # --- Champion-challenger gate ---
+        # Promove para Production se (a) RMSE melhora >= min_improvement
+        # vs champion atual, E (b) o quality gate de sigma_coverage_0_5
+        # passa (>= 0.70).
+        try:
+            should_promote = champion_challenger(
+                challenger_run_id=run.info.run_id,
+                model_name=config["mlflow"]["model_name"],
+                metric="rmse",
+                min_improvement=0.005,
+            )
+            sigma_ok = bool(sigma_gate_passed)
+
+            client = mlflow.tracking.MlflowClient()
+            if should_promote and sigma_ok:
+                client.transition_model_version_stage(
+                    name=mv.name,
+                    version=mv.version,
+                    stage="Production",
+                    archive_existing_versions=True,
+                )
+                mlflow.set_tag("promotion_status", "promoted_to_production")
+                logger.info(
+                    "Modelo %s v%s PROMOVIDO para Production (champion+gate ok).",
+                    mv.name,
+                    mv.version,
+                )
+            else:
+                stage = "Staging"
+                client.transition_model_version_stage(
+                    name=mv.name,
+                    version=mv.version,
+                    stage=stage,
+                    archive_existing_versions=False,
+                )
+                reason = []
+                if not should_promote:
+                    reason.append("rmse_no_improvement")
+                if not sigma_ok:
+                    reason.append("sigma_gate_failed")
+                mlflow.set_tag(
+                    "promotion_status",
+                    f"staging:{','.join(reason) or 'manual_review'}",
+                )
+                logger.info(
+                    "Modelo %s v%s mantido em Staging (motivo: %s).",
+                    mv.name,
+                    mv.version,
+                    ",".join(reason) or "default",
+                )
+        except Exception as exc:
+            logger.warning(
+                "Falha no champion-challenger / promoção: %s", exc, exc_info=True
+            )
+            mlflow.set_tag("promotion_status", "error")
 
         return str(run.info.run_id)
 

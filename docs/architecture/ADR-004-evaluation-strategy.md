@@ -75,6 +75,22 @@ com **5 critérios** (extensão dos 3 mínimos da rubrica), nota 1–5:
 5. **Disclaimers de Risco** — quando aplicável, inclui aviso de não-
    recomendação? *(extensão específica de governança financeira)*
 
+#### Por que NÃO reduzimos para 3 critérios
+
+A rubrica oficial exige **mínimo de 3 critérios**. A redução para 3
+(Correção, Relevância, Clareza) atenderia tecnicamente, mas perderia
+duas dimensões críticas para um produto de análise financeira:
+
+| Critério extra | O que captura | O que se perde sem ele |
+|---|---|---|
+| **Utilidade para Investidor** | Se a resposta efetivamente auxilia uma decisão (vs. apenas estar correta) | Risco de "respostas corretas mas inúteis" — ex.: "PETR4 é uma empresa de petróleo" para a pergunta "vale a pena comprar?" |
+| **Disclaimers de Risco** | Se a resposta inclui aviso de não-recomendação quando faz predição | Risco regulatório (CVM, LGPD) e cobertura de OWASP LLM09 (Overreliance). Sem esse critério, o juiz não detectaria a falha de segurança mais relevante do produto |
+
+Os 5 critérios são deliberadamente escolhidos para **espelhar as
+salvaguardas implementadas no sistema** (`OutputGuardrail.validate_disclaimers()`,
+prompt do agente, mapeamento OWASP LLM09). Reduzir para 3 criaria gap
+entre o que avaliamos e o que protegemos em runtime.
+
 A pontuação média final (`avg_overall`) é derivada determinísticamente
 como média dos 5 critérios por item, ignorando o `overall_score`
 auto-relatado pelo juiz (que pode vir fora da escala). Saída em
