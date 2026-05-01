@@ -44,6 +44,11 @@ stages:
           cache: false
 
   evaluate:
+    # Congelado: depende de OPENAI_API_KEY e gasta tokens por rodada.
+    # Rode manualmente quando quiser atualizar `metrics/ragas_metrics.json`:
+    #     dvc repro --force evaluate
+    # ou:  dvc unfreeze evaluate && dvc repro evaluate
+    frozen: true
     cmd: python -m evaluation.ragas_eval
     deps:
       - evaluation/ragas_eval.py

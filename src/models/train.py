@@ -11,6 +11,7 @@ import copy
 import hashlib
 import json
 import logging
+import os
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -30,6 +31,19 @@ from src.data.feature_engineering import create_sequences, load_config, split_da
 from src.models.lstm_model import LSTMPredictor
 
 logger = logging.getLogger(__name__)
+
+
+def _ensure_mlflow_tracking_uri() -> None:
+    """Garante um tracking URI válido para o MLflow.
+
+    Quando ``MLFLOW_TRACKING_URI`` não está setada, o MLflow escolhe
+    heuristicamente um backend SQLite no CWD (``sqlite:///mlflow.db``),
+    o que falha quando o arquivo não existe ou foi criado por uma
+    versão incompatível de SQLite. Para execução local sem servidor,
+    forçamos ``file:./mlruns`` (filesystem store) explicitamente.
+    """
+    if not os.getenv("MLFLOW_TRACKING_URI"):
+        mlflow.set_tracking_uri("file:./mlruns")
 
 
 # --- Métricas ---
@@ -417,6 +431,7 @@ def train_and_log(
     early_stopping = EarlyStopping(patience=config["training"]["early_stopping_patience"])
 
     # --- MLflow Tracking ---
+    _ensure_mlflow_tracking_uri()
     mlflow.set_experiment(config["mlflow"]["experiment_name"])
 
     with mlflow.start_run(run_name=f"lstm-{config['ticker']}") as run:

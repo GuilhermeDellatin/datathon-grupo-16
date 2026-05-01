@@ -26,10 +26,13 @@ RAW_SCHEMA = DataFrameSchema(
         "High": Column(float, Check.gt(0), nullable=False),
         "Low": Column(float, Check.gt(0), nullable=False),
         "Close": Column(float, Check.gt(0), nullable=False),
+        # Volume vem como int64 do yfinance; coerce=True converte para
+        # float de forma transparente em vez de falhar a validação.
         "Volume": Column(float, Check.ge(0), nullable=False),
     },
     index=pa.Index("datetime64[ns]"),
     strict=False,  # Permite colunas extras como Adj Close
+    coerce=True,
 )
 
 FEATURE_SCHEMA = DataFrameSchema(
@@ -48,6 +51,7 @@ FEATURE_SCHEMA = DataFrameSchema(
         "volume_sma_20": Column(float, nullable=True),
     },
     strict=False,
+    coerce=True,
 )
 
 

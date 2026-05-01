@@ -27,6 +27,7 @@ from torch.utils.data import DataLoader, TensorDataset
 
 from src.data.feature_engineering import create_sequences, load_config, split_data
 from src.models.train import (
+    _ensure_mlflow_tracking_uri,
     compute_metrics,
     compute_sigma_coverage,
     get_git_sha,
@@ -417,6 +418,7 @@ def run_baselines(
         },
     )
 
+    _ensure_mlflow_tracking_uri()
     mlflow.set_experiment(config["mlflow"]["experiment_name"])
 
     # --- Ridge ---

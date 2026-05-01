@@ -76,6 +76,8 @@ dev = [
     "ipykernel>=6.29.0",
     "matplotlib>=3.8.0",
     "seaborn>=0.13.0",
+    # Versionamento de dados / pipeline reprodutível.
+    "dvc>=3.0.0",
 ]
 # Subset minimal para CI/test runners (não inclui pre-commit, ipykernel, etc.).
 # Usado pelo comando do README: `pip install -e ".[dev,test]"`.
