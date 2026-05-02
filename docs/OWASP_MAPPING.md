@@ -30,6 +30,27 @@ Referência: OWASP Top 10 for LLM Applications (2025)
 
 ---
 
+## LLM04: Model Denial of Service
+
+- **Descrição**: Atacante consome recursos do LLM/sistema com inputs longos, requisições recorrentes ou loops de raciocínio, causando degradação de performance, indisponibilidade ou estouro de custo (em provedores cobrados por token, como OpenAI).
+- **Risco no projeto**: Médio — a API expõe `/agent`, `/predict`, `/infer` e `/train` publicamente; cada chamada ao agente consome tokens da OpenAI (custo direto), e o pipeline de treinamento é caro em CPU/GPU.
+- **Mitigação implementada**:
+  - **Limite de tamanho de input**: `InputGuardrail.max_length = 4096` chars no `/agent` (anti-context-stuffing) e `min_length = 3` para descartar payloads vazios ou irrelevantes — `src/security/guardrails.py::InputGuardrail.validate()`.
+  - **Limite de iterações do agente**: `AgentExecutor(max_iterations=10)` evita loops infinitos do ReAct mesmo com prompt injection parcial — `src/agent/react_agent.py::create_stock_agent()`.
+  - **Validação Pydantic nos endpoints**:
+    - `/predict`: `horizon_days: int = Field(ge=1, le=30)` em `PredictionRequest`.
+    - `/train`: `num_epochs: int | None = Field(ge=1, le=1000)`, `tickers: list[str] | None = Field(max_length=5)`, `period: str | None = Field(max_length=10)` em `TrainRequest`.
+    - `/infer`: shape exato `(sequence_length, n_features)` validado via `np.isfinite` antes de chegar ao modelo.
+    - `/evaluate_quality`: `threshold: float | None = Field(ge=0.0, le=1.0)` em `QualityRequest`.
+  - **Background tasks** para operações longas: `POST /train` retorna `202 ACCEPTED` imediatamente e roda o treinamento via `BackgroundTasks`, sem bloquear o event loop nem segurar conexões — `src/serving/app.py::trigger_training()`.
+  - **Cobertura de probes Kubernetes**: `GET /ready` e `GET /startup` permitem que orquestradores parem de rotear tráfego para uma instância sob estresse antes da indisponibilidade total — `src/serving/app.py`.
+  - **Telemetria**: `AGENT_REQUESTS{status="error|blocked"}` e `PREDICTION_LATENCY` no Prometheus permitem detectar tempestades de requisições em tempo real e alertar via Grafana.
+- **Mitigações futuras (não implementadas)**: rate limiting por IP via middleware (ex.: `slowapi`), quotas por API key, circuit breaker em chamadas à OpenAI.
+- **Código**: `src/security/guardrails.py::InputGuardrail`, `src/agent/react_agent.py`, `src/serving/app.py` (modelos `PredictionRequest`, `TrainRequest`, `InferRequest`, `QualityRequest`).
+- **Teste**: `tests/test_guardrails.py::TestInputGuardrail::test_max_length_enforced`, `tests/test_api.py::TestTrainEndpoint::test_train_endpoint_validates_num_epochs`, `tests/test_api.py::TestTrainEndpoint::test_train_endpoint_validates_tickers_max_length`, `tests/test_api.py::TestEvaluateQualityEndpoint::test_invalid_threshold_validation`.
+
+---
+
 ## LLM06: Sensitive Information Disclosure
 
 - **Descrição**: LLM pode revelar informações sensíveis presentes nos dados de treinamento, configurações ou prompts do sistema.

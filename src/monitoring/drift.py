@@ -167,7 +167,7 @@ def run_drift_detection(
     # Salvar relatório
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
-        json.dump(results, f, indent=2)
+        json.dump(results, f, indent=2, ensure_ascii=False)
 
     # Log no MLflow
     try:

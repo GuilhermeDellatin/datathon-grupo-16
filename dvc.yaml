@@ -29,7 +29,26 @@ stages:
       - metrics/train_metrics.json:
           cache: false
 
+  baseline:
+    cmd: python -m src.models.baseline
+    deps:
+      - src/models/baseline.py
+      - src/models/train.py
+      - data/processed/petr4_features.parquet
+      - configs/model_config.yaml
+    outs:
+      - models/ridge_petr4.joblib
+      - models/mlp_petr4.pt
+    metrics:
+      - metrics/baseline_metrics.json:
+          cache: false
+
   evaluate:
+    # Congelado: depende de OPENAI_API_KEY e gasta tokens por rodada.
+    # Rode manualmente quando quiser atualizar `metrics/ragas_metrics.json`:
+    #     dvc repro --force evaluate
+    # ou:  dvc unfreeze evaluate && dvc repro evaluate
+    frozen: true
     cmd: python -m evaluation.ragas_eval
     deps:
       - evaluation/ragas_eval.py

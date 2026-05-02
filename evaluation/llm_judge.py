@@ -1,5 +1,26 @@
 """Avaliação via LLM-as-judge com 5 critérios.
 
+A rubrica oficial da Fase 05 exige no mínimo 3 critérios. Este projeto
+opta deliberadamente por **5 critérios** porque o domínio (análise
+financeira de PETR4.SA) impõe duas dimensões adicionais que os 3
+critérios genéricos (Correção, Relevância, Clareza) não capturam:
+
+- **(4) Utilidade para Investidor** — uma resposta pode ser correta,
+  relevante e clara, mas inútil para a tomada de decisão (ex.: "PETR4 é
+  uma empresa de petróleo"). Isso é um risco específico de domínio que
+  torna o agente irrelevante na prática.
+- **(5) Disclaimers de Risco** — em sistemas que produzem predições
+  financeiras, a ausência de avisos de não-recomendação é um risco
+  regulatório (LGPD, CVM) e de governança (OWASP LLM09 — Overreliance).
+  Sem este critério, o juiz não detectaria a categoria mais importante
+  de falha de segurança da nossa categoria de produto.
+
+A decisão de manter 5 critérios — e não reduzir para 3 — está formalmente
+registrada em `docs/architecture/ADR-004-evaluation-strategy.md` (seção
+"4. LLM-as-Judge" e "Alternativas Rejeitadas"). A pontuação overall é
+calculada determinísticamente como média aritmética dos 5 critérios por
+item, ignorando o `overall_score` auto-relatado pelo juiz.
+
 Critérios:
 1. Correção Técnica — A resposta é factualmente correta?
 2. Relevância — A resposta aborda diretamente a pergunta?

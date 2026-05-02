@@ -8,7 +8,9 @@ from torch.utils.data import DataLoader, TensorDataset
 from src.models.lstm_model import LSTMPredictor
 from src.models.train import (
     EarlyStopping,
+    _deep_merge,
     compute_metrics,
+    compute_sigma_coverage,
     evaluate_epoch,
     get_git_sha,
     train_epoch,
@@ -49,6 +51,61 @@ class TestComputeMetrics:
         y_pred = np.array([1.5, 1.5, 3.5, 3.5])
         metrics = compute_metrics(y_true, y_pred)
         assert metrics["rmse"] >= metrics["mae"]
+
+
+class TestComputeSigmaCoverage:
+    """Testes da métrica de negócio (cobertura sigma)."""
+
+    def test_perfect_predictions_full_coverage(self):
+        """Predições perfeitas devem dar coverage 100%."""
+        y = np.array([10.0, 12.0, 14.0, 16.0])
+        result = compute_sigma_coverage(y, y.copy(), threshold_sigma=0.5)
+        assert result["sigma_coverage"] == 1.0
+
+    def test_partial_coverage_below_full(self):
+        """Erros maiores que threshold devem reduzir coverage."""
+        y_true = np.array([10.0, 20.0, 30.0, 40.0])
+        sigma = float(np.std(y_true))
+        # 1 ponto dentro de 0.5σ, 3 muito acima
+        y_pred = np.array([10.0, 100.0, 200.0, 300.0])
+        result = compute_sigma_coverage(y_true, y_pred, threshold_sigma=0.5)
+        assert 0.0 <= result["sigma_coverage"] <= 1.0
+        assert result["target_sigma"] == pytest.approx(sigma)
+
+    def test_threshold_scales_linearly(self):
+        """threshold_sigma maior deve incluir pelo menos a mesma cobertura."""
+        y_true = np.array([10.0, 12.0, 14.0, 16.0])
+        y_pred = np.array([11.0, 11.0, 15.0, 15.0])
+        small = compute_sigma_coverage(y_true, y_pred, threshold_sigma=0.1)
+        large = compute_sigma_coverage(y_true, y_pred, threshold_sigma=2.0)
+        assert large["sigma_coverage"] >= small["sigma_coverage"]
+
+
+class TestDeepMerge:
+    """Testes do utilitário _deep_merge."""
+
+    def test_merges_top_level(self):
+        merged = _deep_merge({"a": 1, "b": 2}, {"b": 99})
+        assert merged == {"a": 1, "b": 99}
+
+    def test_merges_nested(self):
+        base = {"training": {"epochs": 100, "lr": 0.001}}
+        override = {"training": {"epochs": 10}}
+        merged = _deep_merge(base, override)
+        assert merged["training"]["epochs"] == 10
+        assert merged["training"]["lr"] == 0.001
+
+    def test_does_not_mutate_base(self):
+        base = {"training": {"epochs": 100}}
+        override = {"training": {"epochs": 5}}
+        _deep_merge(base, override)
+        assert base["training"]["epochs"] == 100
+
+    def test_replaces_when_types_differ(self):
+        base = {"a": {"x": 1}}
+        override = {"a": "scalar"}
+        merged = _deep_merge(base, override)
+        assert merged["a"] == "scalar"
 
 
 class TestEarlyStopping:

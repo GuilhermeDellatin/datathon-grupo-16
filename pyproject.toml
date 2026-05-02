@@ -76,6 +76,16 @@ dev = [
     "ipykernel>=6.29.0",
     "matplotlib>=3.8.0",
     "seaborn>=0.13.0",
+    # Versionamento de dados / pipeline reprodutível.
+    "dvc>=3.0.0",
+]
+# Subset minimal para CI/test runners (não inclui pre-commit, ipykernel, etc.).
+# Usado pelo comando do README: `pip install -e ".[dev,test]"`.
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "httpx>=0.26.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -91,6 +101,18 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
 # N803/N806: convenção ML — `X` (features matrix, maiúscula) e `y` (target vector)
 # seguem padrão scikit-learn/PyTorch; renomear para minúscula quebraria legibilidade.
 ignore = ["E501", "N803", "N806"]
+
+[tool.ruff.lint.flake8-bugbear]
+# fastapi.Depends/Body/Query são chamadas idiomáticas em defaults de parâmetro
+# de rotas; sem essa exceção, B008 dispara falso positivo em toda injeção de dependência.
+extend-immutable-calls = [
+    "fastapi.Body",
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.params.Body",
+    "fastapi.params.Depends",
+    "fastapi.params.Query",
+]
 
 [tool.mypy]
 python_version = "3.11"

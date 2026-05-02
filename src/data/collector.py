@@ -31,25 +31,39 @@ def load_config(config_path: str = "configs/model_config.yaml") -> dict:
 
 def collect_stock_data(
     ticker: str,
-    start_date: str,
-    end_date: str,
+    start_date: str | None = None,
+    end_date: str | None = None,
+    period: str | None = None,
 ) -> pd.DataFrame:
     """Coleta dados históricos de ações via yfinance.
 
+    Suporta dois modos de janela: explícito (start_date + end_date) ou
+    relativo (period, ex.: "2y", "6mo", "max"). Se `period` for fornecido,
+    ele tem precedência sobre as datas.
+
     Args:
         ticker: Símbolo da ação (ex: PETR4.SA).
-        start_date: Data inicial no formato YYYY-MM-DD.
-        end_date: Data final no formato YYYY-MM-DD.
+        start_date: Data inicial no formato YYYY-MM-DD (ignorada se period).
+        end_date: Data final no formato YYYY-MM-DD (ignorada se period).
+        period: Janela relativa do yfinance (ex.: "1y", "2y", "max").
 
     Returns:
         DataFrame com colunas OHLCV + Date como index.
 
     Raises:
-        ValueError: Se nenhum dado for retornado.
+        ValueError: Se nenhum dado for retornado ou se nem datas nem
+            period forem fornecidos.
     """
-    logger.info("Coletando dados de %s (%s a %s)", ticker, start_date, end_date)
-
-    df = yf.download(ticker, start=start_date, end=end_date, progress=False)
+    if period:
+        logger.info("Coletando dados de %s (period=%s)", ticker, period)
+        df = yf.download(ticker, period=period, progress=False)
+    elif start_date and end_date:
+        logger.info("Coletando dados de %s (%s a %s)", ticker, start_date, end_date)
+        df = yf.download(ticker, start=start_date, end=end_date, progress=False)
+    else:
+        raise ValueError(
+            "Forneça `period` OU (`start_date` e `end_date`) para coletar dados."
+        )
 
     if df.empty:
         raise ValueError(f"Nenhum dado retornado para {ticker}")

@@ -4,7 +4,7 @@ services:
   airflow:
     build:
       context: .
-      dockerfile: src/serving/Dockerfile.airflow
+      dockerfile: src/api/Dockerfile.airflow
     container_name: airflow_local
 
     user: root

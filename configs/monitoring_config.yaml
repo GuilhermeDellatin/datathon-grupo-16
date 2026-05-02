@@ -43,3 +43,10 @@ grafana:
     - name: "Model Performance"
     - name: "API Health"
     - name: "Drift Detection"
+
+quality_gates:
+  metrics_path: "metrics/train_metrics.json"
+  sigma_coverage:
+    metric_key: "sigma_coverage_0_5"
+    min_coverage: 0.70
+    description: "Datathon Fase 05 — >= 70% das predições dentro de 0.5σ do preço observado"

@@ -8,12 +8,75 @@
 """
 
 import logging
+import re
+from functools import lru_cache
 
 import pandas as pd
+import yaml
 import yfinance as yf
 from langchain_core.tools import Tool
 
 logger = logging.getLogger(__name__)
+
+
+_TICKER_RE = re.compile(r"\b([A-Z]{3,5}\d{1,2}\.SA|[A-Z]{1,5})\b")
+
+
+@lru_cache(maxsize=1)
+def _default_ticker(config_path: str = "configs/model_config.yaml") -> str:
+    """Carrega o ticker default do YAML (cacheado).
+
+    Args:
+        config_path: Caminho do YAML.
+
+    Returns:
+        Ticker default (ex.: "PETR4.SA"). Em caso de falha, "PETR4.SA".
+    """
+    try:
+        with open(config_path) as f:
+            cfg: dict = yaml.safe_load(f) or {}
+        return str(cfg.get("ticker", "PETR4.SA"))
+    except Exception:
+        logger.warning("Falha ao ler ticker do config; usando PETR4.SA")
+        return "PETR4.SA"
+
+
+def _extract_ticker(query: str) -> str:
+    """Extrai ticker da query do usuário; cai no default se não houver.
+
+    Aceita tanto tickers brasileiros (`PETR4.SA`, `VALE3.SA`) quanto
+    americanos (`AAPL`, `MSFT`). Sem match, retorna o ticker default.
+
+    Args:
+        query: Texto livre do usuário.
+
+    Returns:
+        Ticker resolvido.
+    """
+    if not query:
+        return _default_ticker()
+    match = _TICKER_RE.search(query.upper())
+    if match:
+        return match.group(1)
+    return _default_ticker()
+
+
+@lru_cache(maxsize=1)
+def _model_registry_name(config_path: str = "configs/model_config.yaml") -> str:
+    """Nome do modelo no MLflow Registry, lido do YAML (cacheado).
+
+    Args:
+        config_path: Caminho do YAML.
+
+    Returns:
+        `mlflow.model_name` ou "lstm-petr4" como fallback.
+    """
+    try:
+        with open(config_path) as f:
+            cfg: dict = yaml.safe_load(f) or {}
+        return str(cfg.get("mlflow", {}).get("model_name", "lstm-petr4"))
+    except Exception:
+        return "lstm-petr4"
 
 
 # --- Tool 1: Predição via LSTM ---
@@ -33,7 +96,7 @@ def _predict_stock_price(query: str) -> str:
         from src.data.feature_engineering import compute_features
         from src.models.predict import StockPredictor
 
-        ticker = "PETR4.SA"  # Default do projeto
+        ticker = _extract_ticker(query)
 
         # Buscar dados recentes para contexto
         df = yf.download(ticker, period="6mo", progress=False)
@@ -104,7 +167,7 @@ def _fetch_market_data(query: str) -> str:
         String com dados de mercado formatados.
     """
     try:
-        ticker = "PETR4.SA"
+        ticker = _extract_ticker(query)
 
         hist = yf.download(ticker, period="1mo", progress=False)
 
@@ -228,7 +291,7 @@ def _compare_model_versions(query: str) -> str:
         import mlflow
 
         client = mlflow.tracking.MlflowClient()
-        model_name = "lstm-petr4"
+        model_name = _model_registry_name()
 
         versions = client.search_model_versions(f"name='{model_name}'")
 

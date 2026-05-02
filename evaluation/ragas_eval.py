@@ -135,8 +135,8 @@ def evaluate_rag_pipeline(
 
     # Salvar métricas
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, "w") as f:
-        json.dump(metrics, f, indent=2)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2, ensure_ascii=False)
 
     logger.info("RAGAS scores: %s", metrics)
 
