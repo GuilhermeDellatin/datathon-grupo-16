@@ -49,11 +49,21 @@ class MLflowModelRegistry:
         mlflow_module = _import_mlflow()
         self._configure_tracking(mlflow_module)
 
-        registered_model = mlflow_module.register_model(model_uri, model_name)
+        client = mlflow_module.tracking.MlflowClient()
+        # Ensure registered model exists
+        try:
+            client.create_registered_model(model_name)
+        except Exception:
+            # Already exists or creation failed; continue to create a version
+            logger.debug("Registered model '%s' may already exist", model_name)
+
+        # Create a new model version from the logged model URI
+        mv = client.create_model_version(name=model_name, source=model_uri)
+
         info = {
-            "name": str(registered_model.name),
-            "version": str(registered_model.version),
-            "run_id": str(getattr(registered_model, "run_id", "") or ""),
+            "name": str(mv.name),
+            "version": str(mv.version),
+            "run_id": str(getattr(mv, "run_id", "") or ""),
             "model_uri": model_uri,
         }
         logger.info(

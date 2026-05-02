@@ -402,8 +402,11 @@ def train_and_log(config_path: str = "configs/model_config.yaml") -> str:
             model_path,
         )
 
-        mlflow.log_artifact(model_path)
-        mlflow.pytorch.log_model(model, "model")
+        # Log the raw model file under the artifact path 'model'. We avoid
+        # calling `mlflow.pytorch.log_model` because some tracking server
+        # deployments may not expose the `logged-models` endpoint used by the
+        # SDK; logging the artifact directly is more portable.
+        mlflow.log_artifact(model_path, artifact_path="model")
 
         # Métricas em JSON
         metrics_path = "metrics/train_metrics.json"

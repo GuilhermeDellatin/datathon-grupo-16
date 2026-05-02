@@ -8,17 +8,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY pyproject.toml .
+# Copy project files needed for package installation
+COPY pyproject.toml README.md ./
 COPY src/ src/
-COPY configs/ configs/
-COPY models/ models/
-COPY data/rag_index/ data/rag_index/
-COPY data/rag_documents/ data/rag_documents/
-COPY data/processed/ data/processed/
 
 # Install dependencies
 RUN pip install --no-cache-dir -e .
+
+# Copy runtime assets and create generated artifact directories.
+# docker-compose mounts ./models, ./data, and ./configs over these paths.
+COPY configs/ configs/
+COPY data/rag_documents/ data/rag_documents/
+RUN mkdir -p models data/raw data/processed data/rag_index metrics
 
 # Expose port
 EXPOSE 8000

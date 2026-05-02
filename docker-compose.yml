@@ -8,6 +8,7 @@ services:
     env_file:
       - .env
     volumes:
+      - ./src:/app/src
       - ./models:/app/models
       - ./data:/app/data
       - ./configs:/app/configs

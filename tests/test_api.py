@@ -4,6 +4,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
+import src.serving.app as serving_app_module
 from src.serving.app import app
 
 
@@ -98,14 +99,33 @@ class TestTrainEndpoint:
 
     def test_train_endpoint_returns_processing(self, client, monkeypatch):
         """POST /train deve retornar 202 com status processing."""
+
+        def fake_training_task():
+            serving_app_module._update_training_status(
+                status="completed",
+                finished_at="2026-01-01T00:00:00+00:00",
+                error=None,
+            )
+
+        monkeypatch.setattr("src.serving.app._run_training_task", fake_training_task)
         monkeypatch.setattr(
-            "src.serving.app._run_training_task", lambda: None
+            "src.serving.app._predictor",
+            object(),
         )
         response = client.post("/train")
         assert response.status_code == 202
         data = response.json()
         assert data["status"] == "processing"
         assert "message" in data
+
+    def test_train_status_endpoint_returns_state(self, client):
+        """GET /train/status deve retornar estado do treinamento."""
+        response = client.get("/train/status")
+        assert response.status_code == 200
+        data = response.json()
+        assert "status" in data
+        assert "model_loaded" in data
+        assert "error" in data
 
 
 class TestInferEndpoint:

@@ -10,8 +10,11 @@ Endpoints:
 """
 
 import logging
+import threading
 import time
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+from typing import Any
 
 import numpy as np
 from dotenv import load_dotenv
@@ -85,6 +88,18 @@ class TrainResponse(BaseModel):
     status: str
 
 
+class TrainStatusResponse(BaseModel):
+    """Response do status de treinamento."""
+
+    status: str
+    started_at: str | None
+    finished_at: str | None
+    run_id: str | None
+    registered_model: dict[str, Any] | None
+    error: str | None
+    model_loaded: bool
+
+
 class InferRequest(BaseModel):
     """Request de inferência raw com features já escaladas."""
 
@@ -104,6 +119,32 @@ class InferResponse(BaseModel):
 
 _predictor = None
 _agent = None
+_training_status_lock = threading.Lock()
+_training_status: dict[str, Any] = {
+    "status": "idle",
+    "started_at": None,
+    "finished_at": None,
+    "run_id": None,
+    "registered_model": None,
+    "error": None,
+}
+
+
+def _now_iso() -> str:
+    return datetime.now(UTC).isoformat()
+
+
+def _update_training_status(**updates: Any) -> None:
+    with _training_status_lock:
+        _training_status.update(updates)
+
+
+def _get_training_status() -> dict[str, Any]:
+    with _training_status_lock:
+        status_snapshot = dict(_training_status)
+
+    status_snapshot["model_loaded"] = _predictor is not None
+    return status_snapshot
 
 
 @asynccontextmanager
@@ -279,12 +320,15 @@ def _run_training_task() -> None:
         from src.models.train import train_and_log
 
         run_id = train_and_log()
+        _update_training_status(run_id=run_id)
         logger.info("Treinamento concluído com run_id=%s", run_id)
 
+        registered_model = None
         try:
             from src.monitoring.model_registry import register_model_run
 
             registered_model = register_model_run(run_id)
+            _update_training_status(registered_model=registered_model)
             logger.info(
                 "Modelo registrado no MLflow Registry: %s v%s",
                 registered_model["name"],
@@ -302,9 +346,22 @@ def _run_training_task() -> None:
             new_predictor = StockPredictor()
             _predictor = new_predictor
             logger.info("Modelo recarregado com sucesso após treinamento")
-        except Exception:
+        except Exception as exc:
             logger.error("Falha ao recarregar modelo após treinamento", exc_info=True)
-    except Exception:
+            raise RuntimeError(f"Training completed but model reload failed: {exc}") from exc
+
+        _update_training_status(
+            status="completed",
+            finished_at=_now_iso(),
+            error=None,
+            registered_model=registered_model,
+        )
+    except Exception as exc:
+        _update_training_status(
+            status="failed",
+            finished_at=_now_iso(),
+            error=str(exc),
+        )
         logger.error("Falha no pipeline de treinamento", exc_info=True)
 
 
@@ -324,11 +381,32 @@ async def trigger_training(
     Returns:
         Status inicial do processamento.
     """
+    training_status = _get_training_status()
+    if training_status["status"] == "processing":
+        return TrainResponse(
+            message="Pipeline de treinamento ja esta em execucao.",
+            status="processing",
+        )
+
+    _update_training_status(
+        status="processing",
+        started_at=_now_iso(),
+        finished_at=None,
+        run_id=None,
+        registered_model=None,
+        error=None,
+    )
     background_tasks.add_task(_run_training_task)
     return TrainResponse(
         message="Pipeline de treinamento iniciado em background.",
         status="processing",
     )
+
+
+@app.get("/train/status", response_model=TrainStatusResponse)
+async def get_training_status() -> TrainStatusResponse:
+    """Retorna o status do treinamento em background."""
+    return TrainStatusResponse(**_get_training_status())
 
 
 @app.post("/infer", response_model=InferResponse)

@@ -3,7 +3,12 @@ FROM apache/airflow:2.9.0-python3.11
 USER airflow
 WORKDIR /app
 
-COPY --chown=airflow:root pyproject.toml .
-RUN pip install --no-cache-dir -e .
-
+COPY --chown=airflow:root pyproject.toml README.md ./
 COPY --chown=airflow:root src/ src/
+COPY --chown=airflow:root evaluation/ evaluation/
+COPY --chown=airflow:root configs/ configs/
+COPY --chown=airflow:root data/rag_documents/ data/rag_documents/
+COPY --chown=airflow:root data/golden_set/ data/golden_set/
+
+RUN mkdir -p data/raw data/processed data/rag_index metrics models
+RUN pip install --no-cache-dir -e .

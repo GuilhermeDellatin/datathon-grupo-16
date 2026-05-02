@@ -37,9 +37,15 @@ services:
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
       AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      API_BASE_URL: ${API_BASE_URL:-http://api:8000}
+      API_TIMEOUT_SECONDS: ${API_TIMEOUT_SECONDS:-120}
+      TRAIN_STATUS_POLL_SECONDS: ${TRAIN_STATUS_POLL_SECONDS:-30}
+      TRAIN_STATUS_TIMEOUT_SECONDS: ${TRAIN_STATUS_TIMEOUT_SECONDS:-7200}
+      METRICS_DIR: /app/metrics
     volumes:
       - ./airflow_home:/opt/airflow
       - ./airflow/dags:/opt/airflow/dags
+      - ./metrics:/app/metrics
     command: webserver
 
 
@@ -55,7 +61,13 @@ services:
       AIRFLOW_HOME: /opt/airflow
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
       AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      API_BASE_URL: ${API_BASE_URL:-http://api:8000}
+      API_TIMEOUT_SECONDS: ${API_TIMEOUT_SECONDS:-120}
+      TRAIN_STATUS_POLL_SECONDS: ${TRAIN_STATUS_POLL_SECONDS:-30}
+      TRAIN_STATUS_TIMEOUT_SECONDS: ${TRAIN_STATUS_TIMEOUT_SECONDS:-7200}
+      METRICS_DIR: /app/metrics
     volumes:
       - ./airflow_home:/opt/airflow
       - ./airflow/dags:/opt/airflow/dags
+      - ./metrics:/app/metrics
     command: scheduler
