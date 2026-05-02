@@ -305,7 +305,7 @@ def train_mlp_baseline(
             for X_batch, y_batch in val_loader:
                 X_batch, y_batch = X_batch.to(device), y_batch.to(device)
                 val_loss += criterion(model(X_batch), y_batch).item() * len(X_batch)
-        val_loss = val_loss / max(len(val_loader.dataset), 1)  # type: ignore[arg-type]
+        val_loss = val_loss / max(len(val_loader.dataset), 1)  # type: ignore[arg-type, operator]
 
         if val_loss < best_val:
             best_val = val_loss
@@ -535,23 +535,23 @@ def _build_comparison(
     candidates = {"ridge": ridge, "mlp": mlp, "lstm": lstm}
     out: dict[str, Any] = {}
     for metric in ("mae", "rmse", "mape"):
-        scores = {
-            name: m.get(metric)
-            for name, m in candidates.items()
-            if m.get(metric) is not None
-        }
+        scores: dict[str, float] = {}
+        for name, m in candidates.items():
+            value = m.get(metric)
+            if value is not None:
+                scores[name] = value
         if scores:
-            best = min(scores, key=lambda k: scores[k])  # type: ignore[arg-type]
+            best = min(scores, key=lambda k: scores[k])
             out[f"best_{metric}"] = {"model": best, "value": scores[best]}
     if any("sigma_coverage_0_5" in m for m in candidates.values()):
-        scores = {
-            name: m.get("sigma_coverage_0_5")
-            for name, m in candidates.items()
-            if m.get("sigma_coverage_0_5") is not None
-        }
-        if scores:
-            best = max(scores, key=lambda k: scores[k])  # type: ignore[arg-type]
-            out["best_sigma_coverage_0_5"] = {"model": best, "value": scores[best]}
+        sigma_scores: dict[str, float] = {}
+        for name, m in candidates.items():
+            value = m.get("sigma_coverage_0_5")
+            if value is not None:
+                sigma_scores[name] = value
+        if sigma_scores:
+            best = max(sigma_scores, key=lambda k: sigma_scores[k])
+            out["best_sigma_coverage_0_5"] = {"model": best, "value": sigma_scores[best]}
     return out
 
 

@@ -49,7 +49,8 @@ def load_metrics(metrics_path: str = DEFAULT_METRICS_PATH) -> dict[str, Any]:
             "Rode `make train` antes do quality gate."
         )
     with open(path) as f:
-        return json.load(f)
+        data: dict[str, Any] = json.load(f)
+    return data
 
 
 def load_gate_config(
@@ -68,8 +69,9 @@ def load_gate_config(
         logger.warning("Config %s não encontrado. Usando defaults.", config_path)
         return {}
     with open(path) as f:
-        cfg: dict = yaml.safe_load(f) or {}
-    return cfg.get("quality_gates", {})
+        cfg: dict[str, Any] = yaml.safe_load(f) or {}
+    gates: dict[str, Any] = cfg.get("quality_gates", {})
+    return gates
 
 
 def check_sigma_coverage_gate(

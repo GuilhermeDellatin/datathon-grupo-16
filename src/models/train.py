@@ -73,7 +73,7 @@ def compute_fairness_by_volatility(
     y_pred: np.ndarray,
     n_quantiles: int = 3,
     fairness_tolerance: float = 0.10,
-) -> dict[str, float]:
+) -> dict[str, Any]:
     """Avalia fairness do modelo entre regimes de volatilidade.
 
     Divide o teste em ``n_quantiles`` faixas pela volatilidade local da
