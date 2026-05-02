@@ -5,7 +5,7 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from src.serving.app import app
+from src.api.app import app
 
 
 @pytest.fixture
@@ -128,7 +128,7 @@ class TestTrainEndpoint:
         def _spy(req=None):
             captured["req"] = req
 
-        monkeypatch.setattr("src.serving.app._run_training_task", _spy)
+        monkeypatch.setattr("src.api.routes.train._run_training_task", _spy)
         return captured
 
     def test_train_endpoint_returns_processing(self, client, fake_task):
@@ -204,8 +204,8 @@ class TestLivenessProbe:
 
     def test_does_not_check_dependencies(self, client, monkeypatch):
         """Liveness deve ignorar estado de modelo/agente."""
-        monkeypatch.setattr("src.serving.app._predictor", None)
-        monkeypatch.setattr("src.serving.app._agent", None)
+        monkeypatch.setattr("src.api.dependencies._predictor", None)
+        monkeypatch.setattr("src.api.dependencies._agent", None)
         assert client.get("/").status_code == 200
 
 
@@ -213,18 +213,18 @@ class TestReadinessProbe:
     """Testes do readiness probe (GET /ready)."""
 
     def test_503_when_model_missing(self, client, monkeypatch):
-        monkeypatch.setattr("src.serving.app._predictor", None)
-        monkeypatch.setattr("src.serving.app._agent", object())
+        monkeypatch.setattr("src.api.dependencies._predictor", None)
+        monkeypatch.setattr("src.api.dependencies._agent", object())
         assert client.get("/ready").status_code == 503
 
     def test_503_when_agent_missing(self, client, monkeypatch):
-        monkeypatch.setattr("src.serving.app._predictor", object())
-        monkeypatch.setattr("src.serving.app._agent", None)
+        monkeypatch.setattr("src.api.dependencies._predictor", object())
+        monkeypatch.setattr("src.api.dependencies._agent", None)
         assert client.get("/ready").status_code == 503
 
     def test_200_when_both_loaded(self, client, monkeypatch):
-        monkeypatch.setattr("src.serving.app._predictor", object())
-        monkeypatch.setattr("src.serving.app._agent", object())
+        monkeypatch.setattr("src.api.dependencies._predictor", object())
+        monkeypatch.setattr("src.api.dependencies._agent", object())
         response = client.get("/ready")
         assert response.status_code == 200
         data = response.json()
@@ -243,7 +243,7 @@ class TestStartupProbe:
 
     def test_200_when_startup_complete(self, client, monkeypatch):
         """Após inicialização, /startup deve retornar 200."""
-        monkeypatch.setattr("src.serving.app._startup_complete", True)
+        monkeypatch.setattr("src.api.dependencies._startup_complete", True)
         response = client.get("/startup")
         assert response.status_code == 200
         data = response.json()
@@ -251,7 +251,7 @@ class TestStartupProbe:
 
     def test_503_when_startup_pending(self, client, monkeypatch):
         """Antes da inicialização (_startup_complete=False), retorna 503."""
-        monkeypatch.setattr("src.serving.app._startup_complete", False)
+        monkeypatch.setattr("src.api.dependencies._startup_complete", False)
         assert client.get("/startup").status_code == 503
 
     def test_lifespan_sets_flag(self):
@@ -334,7 +334,7 @@ class TestInferEndpoint:
                 assert data.shape == (60, 14)
                 return 0.123
 
-        monkeypatch.setattr("src.serving.app._predictor", FakePredictor())
+        monkeypatch.setattr("src.api.dependencies._predictor", FakePredictor())
 
     def test_infer_endpoint_returns_prediction(self, client):
         """POST /infer com payload válido deve retornar predição."""

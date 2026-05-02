@@ -41,7 +41,7 @@ baseline: ## Treina baselines (Ridge + MLP) e salva metrics/baseline_metrics.jso
 	python -m src.models.baseline
 
 serve: ## Sobe API local
-	uvicorn src.serving.app:app --host 0.0.0.0 --port 8000 --reload
+	uvicorn src.api.app:app --host 0.0.0.0 --port 8000 --reload
 
 evaluate: ## Roda avaliação RAGAS + LLM-as-judge
 	python -m evaluation.ragas_eval

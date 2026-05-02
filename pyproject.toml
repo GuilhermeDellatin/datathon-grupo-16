@@ -102,6 +102,18 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
 # seguem padrão scikit-learn/PyTorch; renomear para minúscula quebraria legibilidade.
 ignore = ["E501", "N803", "N806"]
 
+[tool.ruff.lint.flake8-bugbear]
+# fastapi.Depends/Body/Query são chamadas idiomáticas em defaults de parâmetro
+# de rotas; sem essa exceção, B008 dispara falso positivo em toda injeção de dependência.
+extend-immutable-calls = [
+    "fastapi.Body",
+    "fastapi.Depends",
+    "fastapi.Query",
+    "fastapi.params.Body",
+    "fastapi.params.Depends",
+    "fastapi.params.Query",
+]
+
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
