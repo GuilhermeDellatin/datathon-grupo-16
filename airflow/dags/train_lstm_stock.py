@@ -68,8 +68,8 @@ def _job_dir(job_id: str) -> Path:
 
 def _write_job_config(conf: dict[str, Any]) -> str:
     """Persiste o `conf` em YAML para que o stage de treino possa lê-lo."""
-    job_dir = _job_dir(conf["job_id"])
-    config_path = job_dir / "config.yaml"
+    config_path = Path(PROJECT_ROOT) / "configs" / "job_params.yaml"
+    config_path.parent.mkdir(parents=True, exist_ok=True)
     with config_path.open("w", encoding="utf-8") as fh:
         yaml.safe_dump(conf, fh, sort_keys=False, allow_unicode=True)
     logger.info("Config do job persistida em %s", config_path)
@@ -158,7 +158,12 @@ def dvc_repro(**context: Any) -> None:
         task_ids="prepare_job", key="config_path"
     )
     env = _job_env(conf, config_path)
-    _run_subprocess(["dvc", "repro"], env=env, step="dvc_repro")
+    
+    #cmd = ["dvc", "repro"]
+    #if conf.get("force_repro") is True:
+        #cmd.append("--force")
+        
+    _run_subprocess(cmd, env=env, step="dvc_repro")
 
 
 def dvc_push(**context: Any) -> None:
