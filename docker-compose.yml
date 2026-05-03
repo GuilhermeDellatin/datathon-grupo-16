@@ -65,8 +65,19 @@ services:
       - ./mlruns:/opt/airflow/mlruns
       - ./dvc.yaml:/opt/airflow/dvc.yaml
       - ./dvc.lock:/opt/airflow/dvc.lock
-      - ./.dvc:/opt/airflow/.dvc
-      - ../dvc-storage:/dvc-storage
+      # `.dvc/config` é versionado e precisa vir do host. Já `cache/` e `tmp/`
+      # fazem operações POSIX (chmod 0o444, rename atômico, hardlinks) que
+      # bind mounts do Docker Desktop no Windows rejeitam com EPERM. Por isso
+      # esses dois ficam em volumes nomeados (filesystem ext4 do VM do Docker).
+      - ./.dvc/config:/opt/airflow/.dvc/config
+      - dvc_cache:/opt/airflow/.dvc/cache
+      - dvc_tmp:/opt/airflow/.dvc/tmp
+      # DVC precisa de repositório git para resolver hashes/refs.
+      - ./.git:/opt/airflow/.git
+      # `.dvc/config` tem `url = ../../dvc-storage` (relativo a .dvc/). De
+      # /opt/airflow/.dvc isso resolve para /opt/dvc-storage — então o mount
+      # target do remote local PRECISA ser /opt/dvc-storage (não /dvc-storage).
+      - ../dvc-storage:/opt/dvc-storage
     working_dir: /opt/airflow
     # Bloco literal (`|`) para evitar que YAML colapse a continuação dos
     # argumentos do `airflow users create`. `set -e` propaga falhas (exceto
@@ -95,10 +106,28 @@ services:
         exec airflow webserver
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.10.0
+    # Versão alinhada com o cliente instalado no container do airflow
+    # (mlflow==3.11.1 via pyproject.toml). Servidor 2.x recusa com 404 o
+    # endpoint /api/2.0/mlflow/logged-models que o `mlflow.pytorch.log_model`
+    # do client 3.x usa.
+    image: ghcr.io/mlflow/mlflow:v3.11.1
     ports:
       - "5000:5000"
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow/artifacts
+    # `--serve-artifacts` faz o servidor receber/gravar artifacts via HTTP
+    # (esquema `mlflow-artifacts://`), evitando que cada cliente tente gravar
+    # localmente em `/mlflow/artifacts`. Sem isso, o train.py rodando no
+    # container do airflow falhava com `PermissionError: '/mlflow'`.
+    # `sqlite:////mlflow/mlflow.db` (4 barras = path absoluto) fixa o DB
+    # dentro do volume `mlflow_data` em vez de no working dir efêmero.
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --serve-artifacts
+      --artifacts-destination /mlflow/artifacts
+      --default-artifact-root mlflow-artifacts:/
+      --allowed-hosts localhost,localhost:5000,127.0.0.1,127.0.0.1:5000,mlflow,mlflow:5000
     volumes:
       - mlflow_data:/mlflow
 
@@ -125,3 +154,5 @@ services:
 volumes:
   mlflow_data:
   grafana_data:
+  dvc_cache:
+  dvc_tmp:

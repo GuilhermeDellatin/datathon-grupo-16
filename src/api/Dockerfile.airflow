@@ -14,3 +14,10 @@ COPY --chown=airflow:root src/ src/
 # que carrega ferramentas de teste/lint não usadas no worker.
 RUN pip install --no-cache-dir -e . \
     && pip install --no-cache-dir "dvc>=3.0.0"
+
+# Pré-cria `.dvc/cache` e `.dvc/tmp` com ownership do usuário `airflow`. Isso é
+# requisito para os named volumes `dvc_cache`/`dvc_tmp` (declarados no compose)
+# herdarem permissões corretas na primeira inicialização — caso contrário o
+# Docker monta o volume vazio como root:root 0755 e o usuário airflow (UID
+# 50000) toma EACCES ao escrever no run-cache do DVC.
+RUN mkdir -p /opt/airflow/.dvc/cache /opt/airflow/.dvc/tmp

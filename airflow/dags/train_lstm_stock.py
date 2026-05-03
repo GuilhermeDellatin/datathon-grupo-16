@@ -148,7 +148,7 @@ def dvc_pull(**context: Any) -> None:
         task_ids="prepare_job", key="config_path"
     )
     env = _job_env(conf, config_path)
-    _run_subprocess(["dvc", "pull"], env=env, step="dvc_pull")
+    _run_subprocess(["dvc", "pull", "--force"], env=env, step="dvc_pull")
 
 
 def dvc_repro(**context: Any) -> None:
