@@ -96,17 +96,31 @@ def save_raw_data(df: pd.DataFrame, output_path: str = "data/raw/petr4_raw.parqu
 
 
 def main() -> None:
-    """Entry point para coleta de dados."""
+    """Entry point para coleta de dados.
+
+    Quando a DAG ``train_lstm_stock`` exporta ``TRAINING_TICKER``/
+    ``TRAINING_PERIOD`` (ou um ``TRAINING_CONFIG_PATH`` válido), esses valores
+    têm precedência sobre os defaults do YAML — assim o ``dvc repro`` baixa o
+    dataset correto para o ticker/período do job.
+    """
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     )
 
+    from src.training_jobs import resolve_collection_params
+
     config = load_config()
+    ticker, start_date, end_date, period = resolve_collection_params(
+        fallback_ticker=config["ticker"],
+        fallback_start=config["data"]["start_date"],
+        fallback_end=config["data"]["end_date"],
+    )
     df = collect_stock_data(
-        ticker=config["ticker"],
-        start_date=config["data"]["start_date"],
-        end_date=config["data"]["end_date"],
+        ticker=ticker,
+        start_date=start_date,
+        end_date=end_date,
+        period=period,
     )
     save_raw_data(df)
 

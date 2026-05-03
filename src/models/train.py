@@ -758,12 +758,30 @@ def champion_challenger(
 
 
 def main() -> None:
-    """Entry point para treinamento."""
+    """Entry point para treinamento.
+
+    Quando a DAG ``train_lstm_stock`` define ``TRAINING_CONFIG_PATH``, os
+    hiperparâmetros do request (``model_config``/``training_config``/``ticker``)
+    são aplicados como overrides em cima do ``configs/model_config.yaml``.
+    Sem job ativo, segue rodando com os defaults do YAML.
+    """
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s [%(name)s] %(levelname)s: %(message)s",
     )
-    run_id = train_and_log()
+
+    from src.training_jobs import conf_to_train_overrides, load_training_job_conf
+
+    conf = load_training_job_conf()
+    overrides = conf_to_train_overrides(conf) if conf else None
+    if overrides:
+        logger.info(
+            "Aplicando overrides do job (job_id=%s): %s",
+            conf.get("job_id") if conf else "?",
+            sorted(overrides.keys()),
+        )
+
+    run_id = train_and_log(overrides=overrides)
     logger.info("Treinamento concluído. Run ID: %s", run_id)
 
 
