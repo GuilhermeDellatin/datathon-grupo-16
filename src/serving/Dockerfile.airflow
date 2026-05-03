@@ -1,9 +1,0 @@
-FROM apache/airflow:2.9.0-python3.11
-
-USER airflow
-WORKDIR /app
-
-COPY --chown=airflow:root pyproject.toml .
-RUN pip install --no-cache-dir -e .
-
-COPY --chown=airflow:root src/ src/
