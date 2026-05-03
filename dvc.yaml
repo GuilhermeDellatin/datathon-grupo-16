@@ -23,6 +23,12 @@ stages:
       - src/models/lstm_model.py
       - data/processed/petr4_features.parquet
       - configs/model_config.yaml
+    params:
+      - configs/job_params.yaml:
+        - ticker
+        - period
+        - model_config
+        - training_config
     outs:
       - models/lstm_petr4_best.pt
     metrics:
@@ -44,12 +50,6 @@ stages:
           cache: false
 
   evaluate:
-    # Antes congelado por depender de OPENAI_API_KEY e gastar tokens por rodada.
-    # Mantido descongelado para rodar no `dvc repro` padrão.
-    # Rode manualmente quando quiser atualizar `metrics/ragas_metrics.json`:
-    #     dvc repro --force evaluate
-    # ou:  dvc unfreeze evaluate && dvc repro evaluate
-    # frozen: true
     cmd: python -m evaluation.ragas_eval
     deps:
       - evaluation/ragas_eval.py
