@@ -50,7 +50,12 @@ def _parse_conf(context: dict[str, Any]) -> dict[str, Any]:
     missing = [key for key in REQUIRED_CONF_KEYS if key not in conf]
     if missing:
         raise AirflowException(
-            f"dag_run.conf incompleto: faltam {missing}. Recebido: {sorted(conf)}"
+            "dag_run.conf incompleto: faltam "
+            f"{missing}. Recebido: {sorted(conf)}. "
+            "Esta DAG é disparada pelo endpoint POST /training/jobs da API "
+            "(que envia o conf esperado). Triggers manuais pelo UI precisam "
+            "informar `Configuration JSON` com ticker, period, model_config e "
+            "training_config."
         )
     return conf
 

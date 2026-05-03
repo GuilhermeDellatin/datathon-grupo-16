@@ -1,14 +1,16 @@
 FROM apache/airflow:2.9.0-python3.11
 
 USER airflow
-WORKDIR /app
+WORKDIR /opt/airflow
 
+# `pip install -e .` exige `src/` presente em build time (setuptools.find
+# vê `include = ["src*"]`). Em runtime, os volumes do compose sobrescrevem
+# `src/`, `airflow/dags/`, `evaluation/`, `configs/` para hot reload de DAGs.
 COPY --chown=airflow:root pyproject.toml .
+COPY --chown=airflow:root src/ src/
+
 # DVC é necessário pela DAG `train_lstm_stock` (executa `dvc pull/repro/push`).
 # Mantemos a instalação explícita aqui para não depender do extra `[dev]`,
 # que carrega ferramentas de teste/lint não usadas no worker.
 RUN pip install --no-cache-dir -e . \
     && pip install --no-cache-dir "dvc>=3.0.0"
-
-COPY --chown=airflow:root src/ src/
-COPY --chown=airflow:root airflow/ airflow/
