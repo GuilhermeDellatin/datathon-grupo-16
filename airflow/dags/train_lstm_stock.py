@@ -91,24 +91,39 @@ def _job_env(conf: dict[str, Any], config_path: str) -> dict[str, str]:
 
 
 def _run_subprocess(cmd: list[str], env: dict[str, str], step: str) -> None:
-    """Executa um comando externo com `cwd=PROJECT_ROOT` e propaga falhas."""
-    logger.info("[%s] executando: %s", step, " ".join(cmd))
+    """Executa um comando externo com `cwd=PROJECT_ROOT`, capturando stdout/stderr.
+
+    Diferente de ``subprocess.run(check=True)`` puro, captura a saída do
+    subprocesso para que o log da task do Airflow mostre o motivo real de
+    uma falha (ex.: ``ERROR: configuration error - ...``) em vez de apenas
+    ``exit=255``.
+    """
+    logger.info("[%s] executando: %s (cwd=%s)", step, " ".join(cmd), PROJECT_ROOT)
     try:
-        subprocess.run(  # nosec B603
+        result = subprocess.run(  # nosec B603
             cmd,
             cwd=PROJECT_ROOT,
             env=env,
-            check=True,
+            check=False,
+            capture_output=True,
+            text=True,
         )
     except FileNotFoundError as exc:
         raise AirflowException(
             f"[{step}] binário não encontrado: {cmd[0]}. Verifique se DVC está instalado "
             "na imagem do Airflow."
         ) from exc
-    except subprocess.CalledProcessError as exc:
+
+    if result.stdout:
+        logger.info("[%s] stdout:\n%s", step, result.stdout.rstrip())
+    if result.stderr:
+        logger.info("[%s] stderr:\n%s", step, result.stderr.rstrip())
+
+    if result.returncode != 0:
         raise AirflowException(
-            f"[{step}] subprocesso falhou (exit={exc.returncode})."
-        ) from exc
+            f"[{step}] subprocesso falhou (exit={result.returncode}). "
+            "Veja stdout/stderr acima para o erro real."
+        )
 
 
 def prepare_job(**context: Any) -> str:
