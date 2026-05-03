@@ -1,0 +1,23 @@
+FROM apache/airflow:2.9.0-python3.11
+
+USER airflow
+WORKDIR /opt/airflow
+
+# `pip install -e .` exige `src/` presente em build time (setuptools.find
+# vê `include = ["src*"]`). Em runtime, os volumes do compose sobrescrevem
+# `src/`, `airflow/dags/`, `evaluation/`, `configs/` para hot reload de DAGs.
+COPY --chown=airflow:root pyproject.toml .
+COPY --chown=airflow:root src/ src/
+
+# DVC é necessário pela DAG `train_lstm_stock` (executa `dvc pull/repro/push`).
+# Mantemos a instalação explícita aqui para não depender do extra `[dev]`,
+# que carrega ferramentas de teste/lint não usadas no worker.
+RUN pip install --no-cache-dir -e . \
+    && pip install --no-cache-dir "dvc>=3.0.0"
+
+# Pré-cria `.dvc/cache` e `.dvc/tmp` com ownership do usuário `airflow`. Isso é
+# requisito para os named volumes `dvc_cache`/`dvc_tmp` (declarados no compose)
+# herdarem permissões corretas na primeira inicialização — caso contrário o
+# Docker monta o volume vazio como root:root 0755 e o usuário airflow (UID
+# 50000) toma EACCES ao escrever no run-cache do DVC.
+RUN mkdir -p /opt/airflow/.dvc/cache /opt/airflow/.dvc/tmp

@@ -7,23 +7,127 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      # Dentro da compose stack os serviços se enxergam pelo nome — não use
+      # `localhost`. Estes valores sobrescrevem qualquer override em .env.
+      - AIRFLOW_BASE_URL=${AIRFLOW_BASE_URL:-http://airflow:8080}
+      - AIRFLOW_USERNAME=${AIRFLOW_USERNAME:-admin}
+      - AIRFLOW_PASSWORD=${AIRFLOW_PASSWORD:-admin}
+      - AIRFLOW_TRAINING_DAG_ID=${AIRFLOW_TRAINING_DAG_ID:-train_lstm_stock}
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
     volumes:
       - ./models:/app/models
       - ./data:/app/data
       - ./configs:/app/configs
     depends_on:
       - mlflow
+      - airflow
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 30s
       timeout: 10s
       retries: 3
 
+  airflow:
+    build:
+      context: .
+      dockerfile: src/api/Dockerfile.airflow
+    container_name: airflow_local
+    # Roda como usuário `airflow` (UID 50000, default da imagem oficial).
+    # Isso é necessário porque o binário `airflow` foi instalado em
+    # `/home/airflow/.local/bin` durante o build — o `root` não tem esse
+    # diretório no PATH e dispara `airflow: command not found`.
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      # Airflow 2.x default só aceita session cookie no REST API. Habilita
+      # `basic_auth` para que `POST /api/v1/dags/.../dagRuns` aceite o
+      # `Authorization: Basic ...` enviado pelo AirflowClient da API.
+      # `session` continua na lista para o UI seguir funcionando.
+      AIRFLOW__API__AUTH_BACKENDS: "airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session"
+      AIRFLOW_USERNAME: ${AIRFLOW_USERNAME:-admin}
+      AIRFLOW_PASSWORD: ${AIRFLOW_PASSWORD:-admin}
+      PROJECT_ROOT: /opt/airflow
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      PYTHONPATH: /opt/airflow
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./src:/opt/airflow/src
+      - ./evaluation:/opt/airflow/evaluation
+      - ./data:/opt/airflow/data
+      - ./configs:/opt/airflow/configs
+      - ./models:/opt/airflow/models
+      - ./metrics:/opt/airflow/metrics
+      - ./mlruns:/opt/airflow/mlruns
+      - ./dvc.yaml:/opt/airflow/dvc.yaml
+      - ./dvc.lock:/opt/airflow/dvc.lock
+      # `.dvc/config` é versionado e precisa vir do host. Já `cache/` e `tmp/`
+      # fazem operações POSIX (chmod 0o444, rename atômico, hardlinks) que
+      # bind mounts do Docker Desktop no Windows rejeitam com EPERM. Por isso
+      # esses dois ficam em volumes nomeados (filesystem ext4 do VM do Docker).
+      - ./.dvc/config:/opt/airflow/.dvc/config
+      - dvc_cache:/opt/airflow/.dvc/cache
+      - dvc_tmp:/opt/airflow/.dvc/tmp
+      # DVC precisa de repositório git para resolver hashes/refs.
+      - ./.git:/opt/airflow/.git
+      # `.dvc/config` tem `url = ../../dvc-storage` (relativo a .dvc/). De
+      # /opt/airflow/.dvc isso resolve para /opt/dvc-storage — então o mount
+      # target do remote local PRECISA ser /opt/dvc-storage (não /dvc-storage).
+      - ../dvc-storage:/opt/dvc-storage
+    working_dir: /opt/airflow
+    # Bloco literal (`|`) para evitar que YAML colapse a continuação dos
+    # argumentos do `airflow users create`. `set -e` propaga falhas (exceto
+    # o `|| true` deliberado para o caso de usuário já existir).
+    # `$$` escapa a interpolação do Compose para que `${VAR}` chegue intacto no
+    # bash do container — onde `AIRFLOW_USERNAME`/`AIRFLOW_PASSWORD` vêm do
+    # bloco `environment:` acima.
+    command:
+      - bash
+      - -lc
+      - |
+        set -e
+        echo "[airflow] migrating database..."
+        airflow db migrate
+        echo "[airflow] ensuring admin user '$${AIRFLOW_USERNAME}'..."
+        airflow users create \
+          --username "$${AIRFLOW_USERNAME}" \
+          --firstname Airflow \
+          --lastname Admin \
+          --role Admin \
+          --email airflow@example.com \
+          --password "$${AIRFLOW_PASSWORD}" || echo "[airflow] user already exists or create failed"
+        echo "[airflow] starting scheduler in background..."
+        airflow scheduler &
+        echo "[airflow] starting webserver (port 8080)..."
+        exec airflow webserver
+
   mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.10.0
+    # Versão alinhada com o cliente instalado no container do airflow
+    # (mlflow==3.11.1 via pyproject.toml). Servidor 2.x recusa com 404 o
+    # endpoint /api/2.0/mlflow/logged-models que o `mlflow.pytorch.log_model`
+    # do client 3.x usa.
+    image: ghcr.io/mlflow/mlflow:v3.11.1
     ports:
       - "5000:5000"
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow/artifacts
+    # `--serve-artifacts` faz o servidor receber/gravar artifacts via HTTP
+    # (esquema `mlflow-artifacts://`), evitando que cada cliente tente gravar
+    # localmente em `/mlflow/artifacts`. Sem isso, o train.py rodando no
+    # container do airflow falhava com `PermissionError: '/mlflow'`.
+    # `sqlite:////mlflow/mlflow.db` (4 barras = path absoluto) fixa o DB
+    # dentro do volume `mlflow_data` em vez de no working dir efêmero.
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --serve-artifacts
+      --artifacts-destination /mlflow/artifacts
+      --default-artifact-root mlflow-artifacts:/
+      --allowed-hosts localhost,localhost:5000,127.0.0.1,127.0.0.1:5000,mlflow,mlflow:5000
     volumes:
       - mlflow_data:/mlflow
 
@@ -50,3 +154,5 @@ services:
 volumes:
   mlflow_data:
   grafana_data:
+  dvc_cache:
+  dvc_tmp:
