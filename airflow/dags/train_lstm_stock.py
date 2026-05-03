@@ -159,9 +159,9 @@ def dvc_repro(**context: Any) -> None:
     )
     env = _job_env(conf, config_path)
     
-    #cmd = ["dvc", "repro"]
-    #if conf.get("force_repro") is True:
-        #cmd.append("--force")
+    cmd = ["dvc", "repro"]
+    if conf.get("force_repro") is True:
+        cmd.append("--force")
         
     _run_subprocess(cmd, env=env, step="dvc_repro")
 
