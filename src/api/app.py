@@ -9,7 +9,8 @@ Endpoints registrados (via `src.api.routes`):
 - POST /predict — Predição de preço via LSTM
 - POST /infer — Inferência raw (machine-to-machine)
 - POST /agent — Query ao agente ReAct
-- POST /train — Retreinamento em background
+- POST /train — Retreinamento em background (legado; mantido por compatibilidade)
+- POST /training/jobs — Cria um job de retreino e delega ao Airflow + DVC
 - POST /evaluate_quality — Quality gate sobre as métricas mais recentes
 """
 

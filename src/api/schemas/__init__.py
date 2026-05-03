@@ -16,7 +16,14 @@ from src.api.schemas.health import (
 from src.api.schemas.infer import InferRequest, InferResponse
 from src.api.schemas.predict import PredictionRequest, PredictionResponse
 from src.api.schemas.quality import QualityRequest, QualityResponse
-from src.api.schemas.train import TrainRequest, TrainResponse
+from src.api.schemas.train import (
+    TrainingJobRequest,
+    TrainingJobResponse,
+    TrainingModelConfig,
+    TrainingRunConfig,
+    TrainRequest,
+    TrainResponse,
+)
 
 __all__ = [
     "AgentRequest",
@@ -33,4 +40,8 @@ __all__ = [
     "StartupResponse",
     "TrainRequest",
     "TrainResponse",
+    "TrainingJobRequest",
+    "TrainingJobResponse",
+    "TrainingModelConfig",
+    "TrainingRunConfig",
 ]
