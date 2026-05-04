@@ -408,7 +408,7 @@ make docker-down  # Derruba a stack
 make clean        # Limpa artefatos
 ```
 
-Convenções obrigatórias (ver [CLAUDE.md](CLAUDE.md)): type hints + docstrings Google em todas as funções, logging estruturado (sem `print`), line length 100, ruff configurado em `pyproject.toml`, secrets via `.env` (nunca hardcoded), DVC para dados (nunca commitar dados reais), split temporal em séries (nunca shuffle).
+Convenções obrigatórias: type hints + docstrings Google em todas as funções, logging estruturado (sem `print`), line length 100, ruff configurado em `pyproject.toml`, secrets via `.env` (nunca hardcoded), DVC para dados (nunca commitar dados reais), split temporal em séries (nunca shuffle).
 
 ---
 
@@ -419,5 +419,9 @@ Desenvolvido pelo **Grupo 16** — Pós Tech MLET/FIAP — Datathon Fase 05.
 | Nome | RM |
 |------|----|
 | Guilherme Fernandes Dellatin | RM365508 |
+| Iana Alexandre Neri | RM360484 |
+| Beatriz Rosa Carneiro Gomes | RM365967 |
+| Cristine Scheibler | RM365433 |
+| João Lucas Oliveira Hilario | RM366185 |
 
 > Projeto educacional. Distribuído sob licença MIT.
