@@ -1,0 +1,64 @@
+# Build context exclusions — mantenha enxuto.
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtualenv
+.venv/
+venv/
+
+# Caches de teste/lint/types
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+test-results.xml
+
+# MLflow / experimentos (não precisam estar no contexto do serving)
+mlruns/
+mlartifacts/
+mlflow.db
+
+# Dados e modelos grandes (gerados pelo pipeline DVC / treino)
+data/raw/
+data/processed/
+data/rag_index/
+models/
+
+# Notebooks (só usados em dev)
+notebooks/
+
+# Documentação extra (não usada em runtime)
+docs/
+specs/
+*.md
+!README.md
+
+# Git e CI
+.git/
+.github/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+uvicorn_stdout.log
+uvicorn_stderr.log
+
+# Airflow DAGs e configs são mount como volume na compose stack — não
+# precisam entrar na imagem da API.
+airflow/
+
+# Tests (não precisam ir para a imagem de produção)
+tests/

@@ -11,6 +11,9 @@ build/
 .venv/
 venv/
 
+# Parâmetros injetados dinamicamente pela DAG do Airflow
+#/configs/job_params.yaml
+
 # Data (managed by DVC)
 data/raw/
 data/processed/

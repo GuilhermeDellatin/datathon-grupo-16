@@ -1,0 +1,663 @@
+{
+  "summary": {
+    "avg_technical_correctness": 3.92,
+    "avg_relevance": 4.04,
+    "avg_clarity": 4.32,
+    "avg_investor_utility": 3.68,
+    "avg_risk_disclaimers": 2.28,
+    "avg_overall": 3.648,
+    "n_evaluated": 25
+  },
+  "detailed": [
+    {
+      "technical_correctness": {
+        "score": 4,
+        "justification": "A resposta apresenta um valor espec�fico de previs�o, mas n�o menciona o modelo ou os indicadores t�cnicos utilizados, que s�o importantes para a an�lise."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a previs�o de pre�o da PETR4 para os pr�ximos 5 dias, conforme solicitado."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara e f�cil de entender, apresentando os dados de forma organizada."
+      },
+      "investor_utility": {
+        "score": 4,
+        "justification": "A resposta fornece uma previs�o de pre�o e varia��o percentual, que s�o informa��es �teis, mas falta contexto sobre a metodologia."
+      },
+      "risk_disclaimers": {
+        "score": 5,
+        "justification": "A resposta inclui um aviso claro de que a previs�o n�o � uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � relevante e clara, mas poderia melhorar ao incluir informa��es sobre a metodologia utilizada para a previs�o e os indicadores t�cnicos considerados.",
+      "query_id": "gs_001",
+      "query": "Qual é a previsão de preço da PETR4 para os próximos 5 dias?"
+    },
+    {
+      "technical_correctness": {
+        "score": 3,
+        "justification": "A resposta apresenta um pre�o previsto e uma varia��o percentual, mas n�o esclarece que o modelo LSTM n�o prev� a dire��o do movimento, apenas o pre�o de fechamento."
+      },
+      "relevance": {
+        "score": 4,
+        "justification": "A resposta aborda a previs�o do pre�o, mas n�o responde diretamente � pergunta sobre a dire��o do movimento da a��o."
+      },
+      "clarity": {
+        "score": 4,
+        "justification": "A resposta � clara e f�cil de entender, mas poderia ser mais organizada ao separar a previs�o do pre�o e a explica��o sobre a dire��o."
+      },
+      "investor_utility": {
+        "score": 3,
+        "justification": "Fornece uma previs�o de pre�o, mas n�o ajuda o investidor a entender a incerteza associada � previs�o da dire��o do movimento."
+      },
+      "risk_disclaimers": {
+        "score": 5,
+        "justification": "Inclui um aviso claro de que a previs�o n�o � uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � informativa, mas carece de clareza sobre a natureza da previs�o em rela��o � dire��o do movimento da a��o. A inclus�o de um disclaimer � positiva, mas a falta de uma explica��o mais completa sobre a previs�o limita sua utilidade para o investidor.",
+      "query_id": "gs_002",
+      "query": "O modelo pode prever se a PETR4 vai subir ou descer amanhã?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta apresenta m�tricas de desempenho do modelo LSTM de forma precisa e correta, sem erros factuais."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a acur�cia das predi��es do modelo LSTM para PETR4, conforme solicitado."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � bem organizada, com informa��es apresentadas de forma clara e f�cil de entender."
+      },
+      "investor_utility": {
+        "score": 4,
+        "justification": "As m�tricas fornecidas s�o �teis para investidores, mas a an�lise poderia incluir mais contexto sobre como essas m�tricas impactam decis�es de investimento."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui disclaimers sobre riscos ou que n�o se trata de uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � tecnicamente correta, relevante e clara, mas carece de um aviso sobre riscos, o que � importante para investidores.",
+      "query_id": "gs_003",
+      "query": "Qual a acurácia das predições do modelo LSTM para PETR4?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta est� factualmente correta ao afirmar que modelos de predi��o baseados em dados hist�ricos n�o conseguem prever eventos inesperados como crises."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre como a predi��o lida com eventos inesperados, explicando a limita��o dos modelos."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara, bem estruturada e f�cil de entender, apresentando as informa��es de forma l�gica."
+      },
+      "investor_utility": {
+        "score": 4,
+        "justification": "A resposta fornece informa��es �teis sobre a limita��o das predi��es, mas poderia incluir exemplos pr�ticos ou sugest�es sobre como lidar com a incerteza."
+      },
+      "risk_disclaimers": {
+        "score": 4,
+        "justification": "Embora a resposta mencione a cautela na interpreta��o das predi��es, n�o inclui um aviso expl�cito de que n�o � uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � bem elaborada e atende a maioria dos crit�rios, mas poderia ser aprimorada com exemplos pr�ticos e um disclaimer mais claro sobre recomenda��es de investimento.",
+      "query_id": "gs_004",
+      "query": "Como a predição lida com eventos inesperados como crises?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta est� factualmente correta, explicando que o RSI mede a velocidade e a mudan�a dos pre�os, e que valores acima de 70 indicam sobrecompra, enquanto valores abaixo de 30 indicam sobrevenda."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre o que � o RSI e como ele indica se uma a��o est� sobrecomprada."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara, bem organizada e f�cil de entender, utilizando uma linguagem acess�vel."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es �teis que podem ajudar um investidor a entender como o RSI pode influenciar suas decis�es de compra e venda."
+      },
+      "risk_disclaimers": {
+        "score": 2,
+        "justification": "A resposta n�o inclui disclaimers de risco, o que � importante para alertar os investidores de que o uso do RSI n�o garante resultados e que deve ser considerado em conjunto com outras an�lises."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � muito boa em termos de corre��o t�cnica, relev�ncia, clareza e utilidade para o investidor, mas carece de avisos de risco que s�o importantes em an�lises financeiras.",
+      "query_id": "gs_005",
+      "query": "O que é o RSI e como ele indica se uma ação está sobrecomprada?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta est� factualmente correta, explicando com precis�o como a SMA e a EMA s�o calculadas e suas diferen�as."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre a diferen�a entre SMA e EMA, fornecendo informa��es pertinentes."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � bem organizada, com explica��es claras e concisas que facilitam a compreens�o."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es �teis que podem ajudar um investidor a entender como as duas m�dias m�veis funcionam e suas implica��es em decis�es de investimento."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui disclaimers de risco ou avisos de que as informa��es n�o constituem uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � tecnicamente correta, relevante, clara e �til, mas carece de disclaimers de risco que s�o importantes em contextos de investimento.",
+      "query_id": "gs_006",
+      "query": "Qual a diferença entre SMA e EMA?"
+    },
+    {
+      "technical_correctness": {
+        "score": 4,
+        "justification": "A resposta � em grande parte correta, mas n�o menciona explicitamente que o MACD � a diferen�a entre EMA(12) e EMA(26), o que � uma informa��o fundamental."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre o que � o MACD e como interpretar seus sinais."
+      },
+      "clarity": {
+        "score": 4,
+        "justification": "A resposta � clara e bem organizada, mas poderia ser mais concisa ao explicar os componentes do MACD."
+      },
+      "investor_utility": {
+        "score": 4,
+        "justification": "A resposta fornece informa��es �teis sobre como interpretar o MACD, mas poderia incluir exemplos pr�ticos para maior clareza."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui nenhum aviso de que as informa��es n�o constituem uma recomenda��o de investimento."
+      },
+      "overall_score": 3,
+      "overall_feedback": "A resposta � informativa e relevante, mas carece de alguns detalhes t�cnicos e n�o inclui disclaimers de risco, o que � importante para investidores.",
+      "query_id": "gs_007",
+      "query": "O que é o MACD e como interpretar seus sinais?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta est� factualmente correta, explicando corretamente a composi��o das Bandas de Bollinger e como s�o calculadas."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre como funcionam as Bandas de Bollinger, explicando sua estrutura e fun��o."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara, bem organizada e f�cil de entender, com uma estrutura que facilita a compreens�o dos conceitos."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es �teis que podem ajudar investidores a entender como usar as Bandas de Bollinger para tomar decis�es de investimento."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui disclaimers sobre riscos ou que n�o � uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � muito boa em termos de corre��o t�cnica, relev�ncia, clareza e utilidade, mas carece de um aviso sobre riscos, o que � importante em contextos de investimento.",
+      "query_id": "gs_008",
+      "query": "Como funcionam as Bandas de Bollinger?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta � factualmente correta e abrange os principais segmentos de atua��o da Petrobras, incluindo Explora��o e Produ��o, Refino, Distribui��o, G�s e Energia, e Biocombust�veis."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre o que a Petrobras faz e quais s�o seus principais segmentos."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara, bem organizada e f�cil de entender, com uma estrutura que facilita a leitura."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es �teis sobre os segmentos da Petrobras, que s�o relevantes para a an�lise financeira e tomada de decis�o de investidores."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui disclaimers de risco ou avisos de que n�o � uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � muito boa em termos de corre��o t�cnica, relev�ncia, clareza e utilidade para investidores, mas carece de disclaimers de risco, o que � importante em an�lises financeiras.",
+      "query_id": "gs_009",
+      "query": "O que a Petrobras faz e quais são seus principais segmentos?"
+    },
+    {
+      "technical_correctness": {
+        "score": 1,
+        "justification": "A resposta do assistente n�o fornece informa��es corretas sobre a pol�tica de dividendos da Petrobras, que � de 45% do fluxo de caixa livre."
+      },
+      "relevance": {
+        "score": 1,
+        "justification": "A resposta n�o aborda diretamente a pergunta feita, que pede informa��es espec�ficas sobre a pol�tica de dividendos."
+      },
+      "clarity": {
+        "score": 3,
+        "justification": "A resposta � clara e f�cil de entender, mas n�o � relevante para a pergunta."
+      },
+      "investor_utility": {
+        "score": 1,
+        "justification": "A resposta n�o fornece informa��es �teis para a tomada de decis�o do investidor, pois n�o apresenta dados sobre a pol�tica de dividendos."
+      },
+      "risk_disclaimers": {
+        "score": 2,
+        "justification": "Embora a resposta n�o inclua um disclaimer de risco, menciona que o usu�rio deve consultar fontes oficiais, o que � uma pr�tica recomendada."
+      },
+      "overall_score": 1,
+      "overall_feedback": "A resposta do assistente falha em fornecer informa��es corretas e relevantes sobre a pol�tica de dividendos da Petrobras, o que � crucial para investidores. A recomenda��o de consultar fontes oficiais � positiva, mas n�o compensa a falta de informa��es diretas.",
+      "query_id": "gs_010",
+      "query": "Qual a política de dividendos da Petrobras?"
+    },
+    {
+      "technical_correctness": {
+        "score": 1,
+        "justification": "A resposta n�o fornece informa��es corretas sobre o n�vel de endividamento da Petrobras, que � um dado espec�fico e relevante."
+      },
+      "relevance": {
+        "score": 1,
+        "justification": "A resposta n�o aborda diretamente a pergunta sobre o n�vel de endividamento da Petrobras."
+      },
+      "clarity": {
+        "score": 3,
+        "justification": "A resposta � clara em sua estrutura, mas n�o � �til devido � falta de informa��es."
+      },
+      "investor_utility": {
+        "score": 1,
+        "justification": "A resposta n�o fornece informa��es �teis para a tomada de decis�o do investidor."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui disclaimers de risco ou avisos sobre a natureza das informa��es."
+      },
+      "overall_score": 1,
+      "overall_feedback": "A resposta do assistente falha em fornecer informa��es relevantes e corretas sobre o n�vel de endividamento da Petrobras, n�o atendendo �s expectativas de um avaliador especializado em an�lise financeira.",
+      "query_id": "gs_011",
+      "query": "Qual é o nível de endividamento da Petrobras?"
+    },
+    {
+      "technical_correctness": {
+        "score": 2,
+        "justification": "A resposta n�o fornece a informa��o espec�fica sobre a produ��o di�ria de petr�leo da Petrobras, que � de aproximadamente 2,8 milh�es de barris por dia."
+      },
+      "relevance": {
+        "score": 2,
+        "justification": "A resposta n�o aborda diretamente a pergunta, pois n�o fornece o dado solicitado sobre a produ��o di�ria."
+      },
+      "clarity": {
+        "score": 3,
+        "justification": "A resposta � clara, mas a falta de informa��o espec�fica a torna menos eficaz."
+      },
+      "investor_utility": {
+        "score": 2,
+        "justification": "A resposta n�o fornece informa��es �teis para a tomada de decis�o, pois n�o apresenta dados concretos sobre a produ��o."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui disclaimers de risco ou avisos sobre a natureza das informa��es."
+      },
+      "overall_score": 2,
+      "overall_feedback": "A resposta do assistente falha em fornecer a informa��o espec�fica solicitada, o que compromete sua utilidade e relev�ncia para o investidor. Al�m disso, n�o h� disclaimers de risco, o que � uma omiss�o importante.",
+      "query_id": "gs_012",
+      "query": "Qual é a produção diária de petróleo da Petrobras?"
+    },
+    {
+      "technical_correctness": {
+        "score": 1,
+        "justification": "A resposta n�o fornece informa��es sobre a arquitetura do modelo LSTM, que era o foco da pergunta."
+      },
+      "relevance": {
+        "score": 1,
+        "justification": "A resposta n�o aborda a pergunta sobre a arquitetura do modelo, desviando-se do tema principal."
+      },
+      "clarity": {
+        "score": 3,
+        "justification": "A resposta � clara em sua nega��o, mas n�o fornece informa��es relevantes."
+      },
+      "investor_utility": {
+        "score": 1,
+        "justification": "A resposta n�o oferece informa��es �teis para a tomada de decis�o do investidor, pois n�o responde � pergunta."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "N�o h� men��o a disclaimers de risco, mas isso n�o se aplica diretamente � pergunta sobre a arquitetura do modelo."
+      },
+      "overall_score": 1,
+      "overall_feedback": "A resposta n�o atende � pergunta sobre a arquitetura do modelo LSTM e n�o fornece informa��es �teis ou relevantes para o investidor.",
+      "query_id": "gs_013",
+      "query": "Qual a arquitetura do modelo LSTM usado para predição?"
+    },
+    {
+      "technical_correctness": {
+        "score": 4,
+        "justification": "A resposta menciona que o modelo utiliza 14 features, mas n�o lista quais s�o, o que � uma parte crucial da pergunta."
+      },
+      "relevance": {
+        "score": 4,
+        "justification": "A resposta aborda a pergunta sobre as features, mas se desvia ao incluir detalhes sobre a arquitetura do modelo, que n�o foram solicitados."
+      },
+      "clarity": {
+        "score": 4,
+        "justification": "A resposta � clara e bem estruturada, mas a inclus�o de informa��es adicionais pode causar confus�o sobre o foco da pergunta."
+      },
+      "investor_utility": {
+        "score": 3,
+        "justification": "Embora a resposta forne�a informa��es sobre a arquitetura do modelo, n�o oferece insights diretos sobre as features que s�o mais relevantes para a tomada de decis�o."
+      },
+      "risk_disclaimers": {
+        "score": 5,
+        "justification": "A resposta inclui um aviso claro de que o modelo � um exerc�cio acad�mico e n�o uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � boa, mas poderia ser melhor se inclu�sse a lista das 14 features mencionadas na pergunta, mantendo o foco na solicita��o original.",
+      "query_id": "gs_014",
+      "query": "Quais features o modelo LSTM utiliza como entrada?"
+    },
+    {
+      "technical_correctness": {
+        "score": 3,
+        "justification": "A resposta fornece m�tricas de desempenho das vers�es do modelo, mas n�o menciona o uso do MLflow Model Registry ou as tags obrigat�rias, que s�o aspectos importantes do versionamento e gerenciamento do modelo."
+      },
+      "relevance": {
+        "score": 3,
+        "justification": "Embora a resposta forne�a informa��es sobre as vers�es do modelo, ela n�o aborda diretamente como o modelo � versionado e gerenciado, conforme solicitado na pergunta."
+      },
+      "clarity": {
+        "score": 4,
+        "justification": "A resposta � clara e bem organizada, apresentando as vers�es e suas m�tricas de forma compreens�vel."
+      },
+      "investor_utility": {
+        "score": 3,
+        "justification": "As informa��es sobre as m�tricas de desempenho podem ser �teis, mas a falta de contexto sobre o gerenciamento do modelo limita sua utilidade para a tomada de decis�o."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui nenhum aviso sobre riscos ou que n�o se trata de uma recomenda��o de investimento."
+      },
+      "overall_score": 2,
+      "overall_feedback": "A resposta apresenta informa��es relevantes sobre as vers�es do modelo, mas falha em abordar como o modelo � versionado e gerenciado, al�m de n�o incluir disclaimers de risco, o que � crucial para investidores.",
+      "query_id": "gs_015",
+      "query": "Como o modelo é versionado e gerenciado?"
+    },
+    {
+      "technical_correctness": {
+        "score": 4,
+        "justification": "A resposta � em grande parte correta, mas n�o menciona o PSI (Population Stability Index) e seus limites, que s�o aspectos importantes do drift detection."
+      },
+      "relevance": {
+        "score": 4,
+        "justification": "A resposta aborda a quest�o do drift detection, mas n�o se aprofunda em como ele funciona especificamente, como o uso do PSI."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara, bem estruturada e f�cil de entender."
+      },
+      "investor_utility": {
+        "score": 3,
+        "justification": "A resposta fornece uma boa vis�o geral, mas falta detalhes pr�ticos que poderiam ser mais �teis para um investidor."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "A resposta n�o inclui nenhum disclaimer sobre riscos ou que n�o � uma recomenda��o de investimento."
+      },
+      "overall_score": 3,
+      "overall_feedback": "A resposta � boa em termos de clareza e relev�ncia, mas carece de detalhes t�cnicos espec�ficos e n�o aborda disclaimers de risco, o que � importante para investidores.",
+      "query_id": "gs_016",
+      "query": "O que é drift detection e como funciona no modelo?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta � factualmente correta, explicando como o pre�o do petr�leo Brent impacta a receita e os lucros da Petrobras."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre a rela��o entre o pre�o do petr�leo Brent e as a��es da PETR4."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara, bem estruturada e f�cil de entender, apresentando as informa��es de forma l�gica."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es �teis sobre como o pre�o do petr�leo pode afetar a valoriza��o das a��es e a pol�tica de dividendos da Petrobras."
+      },
+      "risk_disclaimers": {
+        "score": 2,
+        "justification": "A resposta n�o inclui disclaimers sobre riscos ou que n�o � uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � muito boa em termos de corre��o, relev�ncia, clareza e utilidade, mas carece de um aviso sobre riscos e recomenda��es de investimento.",
+      "query_id": "gs_017",
+      "query": "Como o preço do petróleo Brent afeta a PETR4?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta apresenta informa��es corretas sobre fatores geopol�ticos que podem afetar o pre�o das a��es da Petrobras, como pol�tica de pre�os do petr�leo, conflitos regionais e san��es econ�micas."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre fatores geopol�ticos que podem afetar o pre�o da PETR4, listando fatores relevantes."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � bem organizada, com uma lista clara e f�cil de entender, facilitando a leitura e a compreens�o."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es �teis e pr�ticas que podem ajudar um investidor a entender os riscos e oportunidades associados � PETR4."
+      },
+      "risk_disclaimers": {
+        "score": 2,
+        "justification": "A resposta n�o inclui disclaimers de risco ou avisos de que as informa��es n�o constituem uma recomenda��o de investimento."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � muito boa em termos de corre��o, relev�ncia, clareza e utilidade para investidores, mas carece de disclaimers de risco, o que � importante em an�lises financeiras.",
+      "query_id": "gs_018",
+      "query": "Quais fatores geopolíticos podem afetar o preço da PETR4?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta apresenta informa��es corretas sobre a demanda por petr�leo, os investimentos da Petrobras em descarboniza��o e a pegada de carbono do pr�-sal, sem erros factuais."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre o impacto da transi��o energ�tica na Petrobras, incluindo aspectos relevantes como investimentos e desafios."
+      },
+      "clarity": {
+        "score": 4,
+        "justification": "A resposta � clara e bem organizada, mas poderia ser um pouco mais concisa em algumas partes para facilitar a leitura."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es �teis e relevantes para investidores, como os investimentos em descarboniza��o e os riscos associados � transi��o energ�tica."
+      },
+      "risk_disclaimers": {
+        "score": 4,
+        "justification": "Embora mencione riscos, a resposta n�o inclui um aviso expl�cito de que n�o � uma recomenda��o de investimento, o que poderia ser adicionado para maior clareza."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � bem fundamentada e relevante, mas poderia melhorar em clareza e incluir um disclaimer de risco expl�cito para ser mais completa.",
+      "query_id": "gs_019",
+      "query": "Qual é o impacto da transição energética na Petrobras?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta � factualmente correta e aborda os principais aspectos da rela��o entre o c�mbio USD/BRL e a Petrobras, incluindo receitas, custos e endividamento."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre como o c�mbio afeta a PETR4, explicando os impactos de forma abrangente."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara, bem estruturada e f�cil de entender, com uma organiza��o l�gica dos pontos apresentados."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es �teis e relevantes que podem ajudar um investidor a entender os riscos e oportunidades associados � PETR4 em rela��o ao c�mbio."
+      },
+      "risk_disclaimers": {
+        "score": 2,
+        "justification": "A resposta n�o inclui disclaimers de risco ou avisos de que n�o � uma recomenda��o de investimento, o que � importante para a responsabilidade na comunica��o."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � muito boa em termos de corre��o t�cnica, relev�ncia, clareza e utilidade para investidores, mas carece de disclaimers de risco que s�o importantes em an�lises financeiras.",
+      "query_id": "gs_020",
+      "query": "Como o câmbio USD/BRL afeta a PETR4?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta apresenta informa��es corretas sobre os riscos associados ao investimento em PETR4, incluindo risco pol�tico, de mercado, cambial, operacional e de endividamento."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre os principais riscos de investir em PETR4, listando-os de forma clara."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � bem organizada, com uma estrutura clara que facilita a compreens�o dos riscos mencionados."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "As informa��es fornecidas s�o �teis para investidores, pois detalham os riscos que podem impactar a decis�o de investimento em PETR4."
+      },
+      "risk_disclaimers": {
+        "score": 4,
+        "justification": "Embora a resposta n�o inclua um disclaimer expl�cito de que n�o � uma recomenda��o de investimento, a natureza da resposta sugere que os investidores devem considerar os riscos antes de investir."
+      },
+      "overall_score": 5,
+      "overall_feedback": "A resposta do assistente � completa, precisa e �til, abordando de forma clara os principais riscos de investir em PETR4, com apenas uma leve falta de um disclaimer expl�cito.",
+      "query_id": "gs_021",
+      "query": "Quais são os principais riscos de investir em PETR4?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta � tecnicamente correta ao afirmar que o modelo pode fornecer insights, mas n�o � uma recomenda��o de investimento."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre o uso do modelo para decis�es de investimento."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � clara, bem estruturada e f�cil de entender."
+      },
+      "investor_utility": {
+        "score": 4,
+        "justification": "A resposta fornece informa��es �teis sobre a an�lise de tend�ncias, mas poderia incluir mais detalhes sobre como considerar outros fatores."
+      },
+      "risk_disclaimers": {
+        "score": 5,
+        "justification": "A resposta inclui um aviso claro de que n�o � uma recomenda��o de investimento."
+      },
+      "overall_score": 5,
+      "overall_feedback": "A resposta do assistente � completa, clara e aborda todos os aspectos relevantes da pergunta, incluindo a import�ncia de considerar outros fatores na tomada de decis�o de investimento.",
+      "query_id": "gs_022",
+      "query": "O modelo pode ser usado para tomar decisões de investimento?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta apresenta limita��es do modelo LSTM de forma precisa e correta, sem erros factuais."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre as limita��es do modelo LSTM para predi��o de a��es."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � bem organizada, com uma lista clara das limita��es, facilitando a compreens�o."
+      },
+      "investor_utility": {
+        "score": 4,
+        "justification": "A resposta fornece informa��es �teis que podem ajudar investidores a entender os riscos associados ao uso de LSTM, mas poderia incluir exemplos pr�ticos."
+      },
+      "risk_disclaimers": {
+        "score": 2,
+        "justification": "A resposta n�o inclui disclaimers claros sobre a natureza das previs�es e a n�o garantia de resultados, o que � importante para investidores."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � tecnicamente correta, relevante e clara, mas carece de disclaimers de risco que s�o essenciais para a tomada de decis�o de investimento.",
+      "query_id": "gs_023",
+      "query": "Quais são as limitações do modelo LSTM para predição de ações?"
+    },
+    {
+      "technical_correctness": {
+        "score": 1,
+        "justification": "A resposta do assistente n�o aborda a quest�o sobre como o modelo lida com dados de PII, falhando em fornecer informa��es t�cnicas relevantes."
+      },
+      "relevance": {
+        "score": 1,
+        "justification": "A resposta n�o � relevante, pois n�o responde � pergunta sobre o tratamento de dados de PII."
+      },
+      "clarity": {
+        "score": 1,
+        "justification": "A resposta � confusa e n�o apresenta informa��es claras ou organizadas, limitando-se a uma mensagem de erro."
+      },
+      "investor_utility": {
+        "score": 1,
+        "justification": "A resposta n�o fornece informa��es �teis para investidores, pois n�o aborda a quest�o solicitada."
+      },
+      "risk_disclaimers": {
+        "score": 1,
+        "justification": "N�o h� disclaimers de risco, pois a resposta n�o cont�m informa��es relevantes sobre investimentos."
+      },
+      "overall_score": 1,
+      "overall_feedback": "A resposta do assistente n�o atende a nenhum dos crit�rios esperados, falhando em fornecer informa��es relevantes e �teis sobre o tratamento de dados de PII.",
+      "query_id": "gs_024",
+      "query": "Como o modelo lida com dados de PII do usuário?"
+    },
+    {
+      "technical_correctness": {
+        "score": 5,
+        "justification": "A resposta est� correta ao descrever as Bandas de Bollinger, incluindo a m�dia m�vel simples e a utiliza��o do desvio padr�o para calcular as bandas."
+      },
+      "relevance": {
+        "score": 5,
+        "justification": "A resposta aborda diretamente a pergunta sobre o que s�o as Bandas de Bollinger e sua utilidade na an�lise t�cnica."
+      },
+      "clarity": {
+        "score": 5,
+        "justification": "A resposta � bem organizada, com uma estrutura clara que facilita a compreens�o dos conceitos apresentados."
+      },
+      "investor_utility": {
+        "score": 5,
+        "justification": "A resposta fornece informa��es pr�ticas sobre como as Bandas de Bollinger podem ser utilizadas na an�lise t�cnica, o que � �til para investidores."
+      },
+      "risk_disclaimers": {
+        "score": 2,
+        "justification": "A resposta n�o inclui disclaimers sobre riscos ou a necessidade de usar as Bandas de Bollinger em conjunto com outros indicadores, o que � importante para a tomada de decis�o."
+      },
+      "overall_score": 4,
+      "overall_feedback": "A resposta � tecnicamente correta, relevante e clara, oferecendo informa��es �teis, mas carece de avisos sobre riscos associados ao uso das Bandas de Bollinger.",
+      "query_id": "gs_025",
+      "query": "O que são as Bandas de Bollinger e qual sua utilidade na análise técnica?"
+    }
+  ]
+}
