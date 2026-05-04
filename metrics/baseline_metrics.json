@@ -1,0 +1,72 @@
+{
+  "ridge": {
+    "mae": 1.0837595462799072,
+    "rmse": 1.3356794141467812,
+    "mape": 2.3636747151613235,
+    "target_sigma": 2.2916481494903564,
+    "sigma_threshold_0_5": 1.1458240747451782,
+    "sigma_coverage_0_5": 0.525
+  },
+  "mlp": {
+    "mae": 5.051258087158203,
+    "rmse": 5.205004103601251,
+    "mape": 10.923247039318085,
+    "target_sigma": 2.2916481494903564,
+    "sigma_threshold_0_5": 1.1458240747451782,
+    "sigma_coverage_0_5": 0.0,
+    "best_val_loss": 0.019177566210810956
+  },
+  "feature_columns": [
+    "Close",
+    "Volume",
+    "sma_20",
+    "sma_50",
+    "ema_12",
+    "ema_26",
+    "rsi_14",
+    "macd",
+    "macd_signal",
+    "bollinger_upper",
+    "bollinger_lower",
+    "volume_sma_20",
+    "daily_return",
+    "log_return"
+  ],
+  "n_features": 14,
+  "sequence_length": 60,
+  "prediction_horizon": 1,
+  "lstm": {
+    "mae": 0.1957656443119049,
+    "rmse": 0.20095248434932933,
+    "mape": 22.371208667755127,
+    "best_val_loss": 0.003618395027632897,
+    "mae_price": 4.344594478607178,
+    "rmse_price": 4.459705296175449,
+    "mape_price": 9.341195970773697,
+    "target_sigma": 2.2916481494903564,
+    "sigma_threshold_0_5": 1.1458240747451782,
+    "sigma_coverage_0_5": 0.0,
+    "sigma_coverage_0_5_q1": 0.0,
+    "sigma_coverage_0_5_q2": 0.0,
+    "sigma_coverage_0_5_q3": 0.0,
+    "fairness_gap": 0.0
+  },
+  "comparison": {
+    "best_mae": {
+      "model": "lstm",
+      "value": 0.1957656443119049
+    },
+    "best_rmse": {
+      "model": "lstm",
+      "value": 0.20095248434932933
+    },
+    "best_mape": {
+      "model": "ridge",
+      "value": 2.3636747151613235
+    },
+    "best_sigma_coverage_0_5": {
+      "model": "ridge",
+      "value": 0.525
+    }
+  }
+}

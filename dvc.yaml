@@ -31,9 +31,6 @@ stages:
         - training_config
     outs:
       - models/lstm_petr4_best.pt
-    metrics:
-      - metrics/train_metrics.json:
-          cache: false
 
   baseline:
     cmd: python -m src.models.baseline
@@ -45,15 +42,9 @@ stages:
     outs:
       - models/ridge_petr4.joblib
       - models/mlp_petr4.pt
-    metrics:
-      - metrics/baseline_metrics.json:
-          cache: false
 
   evaluate:
     cmd: python -m evaluation.ragas_eval
     deps:
       - evaluation/ragas_eval.py
       - data/golden_set/
-    metrics:
-      - metrics/ragas_metrics.json:
-          cache: false
