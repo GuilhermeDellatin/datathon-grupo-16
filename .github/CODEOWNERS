@@ -1,0 +1,18 @@
+# CODEOWNERS — Datathon Grupo 16
+#
+# Sintaxe: <pattern> <owner1> <owner2> ...
+# Última regra que casa com o path tem precedência.
+# Docs: https://docs.github.com/en/repositories/managing-your-repositories-settings-and-security/customizing-your-repository/about-code-owners
+#
+# Para essa regra realmente bloquear merges, é preciso habilitar
+# "Require review from Code Owners" na branch protection rule de `master`
+# em Settings > Branches.
+#
+# AVISO (cenário solo): enquanto este repositório tiver apenas um colaborador
+# (@GuilhermeDellatin), NÃO habilite "Require review from Code Owners" — o
+# GitHub não permite self-approval e PRs ficariam permanentemente bloqueados.
+# Quando outros membros do grupo entrarem como collaborators, adicione-os
+# abaixo e aí sim ative a regra.
+
+# Owner global de tudo
+* @GuilhermeDellatin
