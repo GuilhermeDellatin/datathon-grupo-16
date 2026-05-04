@@ -1,0 +1,12 @@
+ticker: PETR4.SA
+period: 5y
+model_config:
+  sequence_length: 60
+  hidden_size: 32
+  num_layers: 1
+  dropout: 0.15
+training_config:
+  epochs: 200
+  batch_size: 32
+  learning_rate: 0.001
+job_id: train_20260504_petr4_sa_b107c0
