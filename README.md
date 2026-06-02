@@ -299,7 +299,6 @@ A API expõe rotas de predição, agente, retreino e observabilidade. Treinament
 | GET | `/` | Liveness probe |
 | GET | `/ready` | Readiness probe (modelo e agente carregados) |
 | GET | `/startup` | Startup probe (lifespan completou) |
-| GET | `/health` | Health check legado |
 | GET | `/metrics` | Métricas Prometheus |
 | POST | `/evaluate_quality` | Quality gate sobre métricas mais recentes |
 
